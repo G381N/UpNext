@@ -48,13 +48,22 @@ export function FolderForm({ userId, folder, onSuccess }: FolderFormProps) {
 
   const onSubmit = (values: FolderFormValues) => {
     startTransition(async () => {
+      let result;
       try {
         if (folder) {
-          await updateFolder(folder.id, userId, values);
-          toast({ title: 'Success', description: 'Folder updated successfully.' });
+          result = await updateFolder(folder.id, userId, values);
+          if (result.success) {
+            toast({ title: 'Success', description: 'Folder updated successfully.' });
+          } else {
+            throw new Error(result.error);
+          }
         } else {
-          await createFolder(userId, values);
-          toast({ title: 'Success', description: 'Folder created successfully.' });
+          result = await createFolder(userId, values);
+           if (result.success) {
+            toast({ title: 'Success', description: 'Folder created successfully.' });
+          } else {
+            throw new Error(result.error);
+          }
         }
         onSuccess?.();
       } catch (error) {
