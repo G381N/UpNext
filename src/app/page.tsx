@@ -81,7 +81,7 @@ export default function LandingPage() {
       <footer className="border-t">
         <div className="container mx-auto flex flex-col items-center justify-between gap-6 py-8 px-4 text-center sm:flex-row">
           <p className="text-sm text-muted-foreground">
-            Built by <span className="font-semibold">Geben</span> with a little help from a friendly AI.
+            Built by <span className="font-semibold">Gebin George</span> to help fix procrastination when we have too much to do.
           </p>
           <Button variant="outline" asChild>
             <a
