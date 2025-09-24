@@ -4,7 +4,7 @@ import { getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import type { Folder } from '@/types';
 import TaskList from '@/components/app/task-list';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { getIcon } from '@/lib/icons';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -15,17 +15,19 @@ import React, { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
-export default function FolderPage({ params }: { params: { folderId: string } }) {
+export default function FolderPage() {
   const { user } = useAuth();
+  const params = useParams();
+  const folderId = params.folderId as string;
   const [folder, setFolder] = useState<Folder | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSettingsSheetOpen, setIsSettingsSheetOpen] = React.useState(false);
 
   useEffect(() => {
-    if (user && params.folderId) {
+    if (user && folderId) {
       const fetchFolder = async () => {
         setLoading(true);
-        const folderRef = doc(db, 'users', user.uid, 'folders', params.folderId);
+        const folderRef = doc(db, 'users', user.uid, 'folders', folderId);
         const folderSnap = await getDoc(folderRef);
         if (folderSnap.exists()) {
           setFolder({ id: folderSnap.id, ...folderSnap.data() } as Folder);
@@ -36,7 +38,7 @@ export default function FolderPage({ params }: { params: { folderId: string } })
       };
       fetchFolder();
     }
-  }, [user, params.folderId]);
+  }, [user, folderId]);
 
   if (loading || !folder) {
     return (
@@ -78,7 +80,7 @@ export default function FolderPage({ params }: { params: { folderId: string } })
           </SheetContent>
         </Sheet>
       </div>
-      <TaskList folderId={params.folderId} />
+      <TaskList folderId={folderId} />
     </div>
   );
 }
