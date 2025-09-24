@@ -53,15 +53,16 @@ function FolderSettingsSheet({ folder, children }: { folder: Folder, children: R
 }
 
 function SidebarLogo() {
-    const { toggleSidebar } = useSidebar();
+    const { toggleSidebar, state } = useSidebar();
     return (
       <button
         onClick={() => toggleSidebar()}
         className={cn(
-          'flex w-full items-center gap-2 text-lg font-bold tracking-tight text-foreground'
+          'flex w-full items-center gap-2 text-lg font-bold tracking-tight text-foreground',
+           state === 'collapsed' && 'justify-center'
         )}
       >
-        <Logo />
+        <Logo showText={state === 'expanded'} />
       </button>
     );
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -23,8 +22,8 @@ const AnimatedLandingPage = () => {
     const timers = [
       100,    // Initial delay before showing logo
       2000,   // Show logo
-      3000,   // Show unsorted list and "Let the AI figure out..."
-      3000,   // Hold on "Let the AI figure out..."
+      4000,   // Show unsorted list and "Let the AI figure out..."
+      4000,   // Hold on "Let the AI figure out..."
       2500,   // Show "Prioritizing..."
       4000,   // Show sorted list
       2500,   // Reset

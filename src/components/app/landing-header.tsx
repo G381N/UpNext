@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Logo } from './logo';
-import { ChevronLeft } from 'lucide-react';
 import { ThemeSwitch } from './theme-switch';
 
 export default function LandingHeader() {
