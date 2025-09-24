@@ -11,8 +11,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', ...fontFamily.sans],
-        headline: ['Inter', ...fontFamily.sans],
+        body: ['var(--font-geist-sans)', ...fontFamily.sans],
+        headline: ['var(--font-geist-sans)', ...fontFamily.sans],
         code: ['monospace'],
       },
       colors: {
@@ -89,32 +89,41 @@ export default {
             height: '0',
           },
         },
-        'bob': {
-          '0%, 100%': { transform: 'translateY(-2%) scale(1)' },
-          '50%': { transform: 'translateY(2%) scale(1.02)' },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
         },
-        'fade-in-right': {
+        'fade-in-up': {
             '0%': {
                 opacity: '0',
-                transform: 'var(--initial-transform)',
+                transform: 'translateY(10px)'
             },
             '100%': {
                 opacity: '1',
-                transform: 'var(--final-transform)',
+                transform: 'translateY(0)'
             },
         },
-        'check-fill': {
-            '0%': { 'background-color': 'transparent' },
-            '25%': { 'background-color': 'hsl(var(--primary))', 'border-color': 'hsl(var(--primary))' },
+        typing: {
+          '0%': { width: '0' },
+          '100%': { width: '100%' },
+        },
+        'check-fill-delayed': {
+            '0%, 50%': { 'background-color': 'transparent' },
             '100%': { 'background-color': 'hsl(var(--primary))', 'border-color': 'hsl(var(--primary))' },
+        },
+        'glow-shadow-sm': {
+            '0%, 100%': { 'box-shadow': '0 0 4px hsl(var(--primary))' },
+            '50%': { 'box-shadow': '0 0 8px hsl(var(--primary))' },
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'bob': 'bob 3s ease-in-out infinite var(--delay)',
-        'fade-in-right': 'fade-in-right var(--duration) ease-in-out forwards var(--delay)',
-        'check-fill': 'check-fill 1s ease-in-out 1.2s forwards',
+        'fade-in': 'fade-in 0.5s ease-in-out forwards',
+        'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
+        'typing': 'typing 1.5s steps(30, end) forwards',
+        'check-fill-delayed': 'check-fill-delayed 0.4s ease-in-out forwards 1s',
+        'glow-shadow-sm': 'glow-shadow-sm 1.5s ease-in-out infinite',
       },
     },
   },
