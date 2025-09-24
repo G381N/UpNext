@@ -52,7 +52,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-xl">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
-                <Logo className="gap-1" />
+                <Logo className="gap-1" iconClassName="h-12 w-12" />
             </div>
             <CardTitle className="font-headline text-3xl tracking-tight">Welcome to NextUp</CardTitle>
             <CardDescription>The smartest way to organize your tasks.</CardDescription>
