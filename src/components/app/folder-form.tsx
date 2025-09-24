@@ -19,7 +19,7 @@ import { iconNames } from '@/lib/icons';
 import { useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import type { Folder } from '@/types';
-import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc, writeBatch, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {
   AlertDialog,
@@ -32,7 +32,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { deleteFolder } from '@/app/actions/folders';
 import { useRouter } from 'next/navigation';
 
 const folderSchema = z.object({
@@ -47,6 +46,30 @@ interface FolderFormProps {
   folder?: Folder;
   onSuccess?: () => void;
 }
+
+async function deleteFolderWithTasks(folderId: string, userId: string) {
+    if (!userId) {
+        throw new Error('User not authenticated');
+    }
+    const folderRef = doc(db, 'users', userId, 'folders', folderId);
+    
+    // Create a batch write to delete the folder and all its tasks atomically
+    const batch = writeBatch(db);
+
+    // Delete the folder
+    batch.delete(folderRef);
+
+    // Find and delete all tasks in the folder
+    const tasksRef = collection(db, 'users', userId, 'tasks');
+    const q = query(tasksRef, where('folderId', '==', folderId));
+    const tasksSnapshot = await getDocs(q);
+    tasksSnapshot.forEach((taskDoc) => {
+        batch.delete(taskDoc.ref);
+    });
+
+    await batch.commit();
+}
+
 
 export function FolderForm({ userId, folder, onSuccess }: FolderFormProps) {
   const [isPending, startTransition] = useTransition();
@@ -100,13 +123,14 @@ export function FolderForm({ userId, folder, onSuccess }: FolderFormProps) {
   const handleDelete = () => {
     if (!folder || !userId) return;
     startDeleteTransition(async () => {
-        const result = await deleteFolder(folder.id, userId);
-        if (result.success) {
-            toast({ title: 'Folder deleted', description: `The "${folder.name}" folder has been removed.` });
+        try {
+            await deleteFolderWithTasks(folder.id, userId);
+            toast({ title: 'Folder deleted', description: `The "${folder.name}" folder and all its tasks have been removed.` });
             router.push('/folders');
             onSuccess?.();
-        } else {
-            toast({ variant: 'destructive', title: 'Error deleting folder', description: result.error });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "An unknown error occurred.";
+            toast({ variant: 'destructive', title: 'Error deleting folder', description: message });
         }
     });
   };

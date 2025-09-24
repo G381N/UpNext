@@ -13,10 +13,12 @@ import {
   SidebarMenuButton,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarMenuAction,
 } from '@/components/ui/sidebar';
 import {
   FolderPlus,
   PlusCircle,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useCollection } from 'react-firebase-hooks/firestore';
@@ -30,6 +32,23 @@ import { FolderForm } from './folder-form';
 import { TaskForm } from './task-form';
 import { Button } from '../ui/button';
 import { getIcon } from '@/lib/icons';
+
+function FolderSettingsSheet({ folder, children }: { folder: Folder, children: React.ReactNode }) {
+    const { user } = useAuth();
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    return (
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild onClick={(e) => e.stopPropagation()}>{children}</SheetTrigger>
+            <SheetContent>
+                <SheetHeader>
+                    <SheetTitle>Folder Settings</SheetTitle>
+                </SheetHeader>
+                <FolderForm userId={user!.uid} folder={folder} onSuccess={() => setIsOpen(false)} />
+            </SheetContent>
+        </Sheet>
+    )
+}
 
 export default function AppSidebar() {
   const { user } = useAuth();
@@ -100,8 +119,8 @@ export default function AppSidebar() {
           <SidebarMenu>
             {loading && (
               <>
-                <SidebarMenuButton size="sm" className="h-8 animate-pulse rounded-md bg-muted" />
-                <SidebarMenuButton size="sm" className="h-8 animate-pulse rounded-md bg-muted" />
+                <SidebarMenuButton className="h-8 animate-pulse rounded-md bg-muted" />
+                <SidebarMenuButton className="h-8 animate-pulse rounded-md bg-muted" />
               </>
             )}
             {folders?.docs.map((doc) => {
@@ -109,19 +128,23 @@ export default function AppSidebar() {
               const FolderIcon = getIcon(folder.icon);
               return (
                 <SidebarMenuItem key={folder.id}>
-                  <Link href={`/folders/${folder.id}`}>
+                  <Link href={`/folders/${folder.id}`} legacyBehavior passHref>
                     <SidebarMenuButton
                       isActive={pathname === `/folders/${folder.id}`}
                       asChild
-                      size="sm"
                       tooltip={{ children: folder.name, side: 'right' }}
                     >
-                      <div className="flex w-full items-center gap-2">
+                      <a>
                         <FolderIcon className="h-4 w-4" />
                         <span>{folder.name}</span>
-                      </div>
+                      </a>
                     </SidebarMenuButton>
                   </Link>
+                   <FolderSettingsSheet folder={folder}>
+                      <SidebarMenuAction showOnHover>
+                          <Settings />
+                      </SidebarMenuAction>
+                  </FolderSettingsSheet>
                 </SidebarMenuItem>
               );
             })}
