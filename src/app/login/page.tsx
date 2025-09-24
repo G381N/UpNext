@@ -9,10 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/app/logo';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ThemeSwitch } from '@/components/app/theme-switch';
+import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
-        <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 2.04-5.07 2.04-4.34 0-7.88-3.57-7.88-7.96s3.55-7.96 7.88-7.96c2.38 0 4.03.98 4.98 1.9l2.6-2.6C18.47 1.94 15.96 1 12.48 1 5.88 1 1 5.98 1 12.5s4.88 11.5 11.48 11.5c6.5 0 11.22-4.4 11.22-11.26 0-.75-.08-1.48-.2-2.18h-11z" />
+        <path fillRule="evenodd" clipRule="evenodd" d="M12 1.5C6.48 1.5 2 5.98 2 12.5s4.48 11 10 11c5.52 0 10-4.48 10-11S17.52 1.5 12 1.5zM12 21.5c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9zm-2.7-9.04h7.4v-1.92h-7.4v1.92zm3.7-3.72c.98 0 1.8.82 1.8 1.8s-.82 1.8-1.8 1.8-1.8-.82-1.8-1.8.82-1.8 1.8-1.8z" fill="black" />
     </svg>
 );
 
@@ -46,6 +48,14 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+        <div className="absolute top-4 left-4">
+            <Button variant="outline" size="icon" asChild>
+                <Link href="/">
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="sr-only">Back to Landing Page</span>
+                </Link>
+            </Button>
+        </div>
         <div className="absolute top-4 right-4">
             <ThemeSwitch />
         </div>
@@ -59,7 +69,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <Button onClick={handleSignIn} size="lg" className="w-full">
-            <GoogleIcon className="mr-2 h-5 w-5 fill-current" />
+            <GoogleIcon className="mr-2 h-5 w-5" />
             Sign In with Google
           </Button>
         </CardContent>
