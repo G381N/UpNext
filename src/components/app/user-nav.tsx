@@ -26,11 +26,15 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
+import { useSidebar } from '../ui/sidebar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { cn } from '@/lib/utils';
 
 export function UserNav() {
   const { user } = useAuth();
   const router = useRouter();
   const { setTheme } = useTheme()
+  const { state: sidebarState } = useSidebar();
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -46,27 +50,48 @@ export function UserNav() {
         .join('')
     : user.email?.[0].toUpperCase() ?? 'U';
 
+  const triggerButton = (
+    <Button
+      variant="ghost"
+      className={cn(
+        "relative h-10 w-full justify-start gap-2 px-2",
+        sidebarState === 'collapsed' && 'h-10 w-10 justify-center p-0'
+      )}
+    >
+      <Avatar className="h-8 w-8">
+        <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? ''} />
+        <AvatarFallback>{fallbackInitials}</AvatarFallback>
+      </Avatar>
+      {sidebarState === 'expanded' && (
+        <div className="flex flex-col items-start text-left">
+            <p className="w-full truncate text-sm font-medium">
+            {user.displayName}
+          </p>
+          <p className="w-full truncate text-xs text-muted-foreground">
+            {user.email}
+          </p>
+        </div>
+      )}
+    </Button>
+  );
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="relative h-10 w-full justify-start gap-2 px-2"
-        >
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? ''} />
-            <AvatarFallback>{fallbackInitials}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col items-start text-left">
-             <p className="w-full truncate text-sm font-medium">
-              {user.displayName}
-            </p>
-            <p className="w-full truncate text-xs text-muted-foreground">
-              {user.email}
-            </p>
-          </div>
-        </Button>
-      </DropdownMenuTrigger>
+      <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                    {triggerButton}
+                </DropdownMenuTrigger>
+            </TooltipTrigger>
+            {sidebarState === 'collapsed' && (
+                <TooltipContent side="right">
+                    <p>{user.displayName}</p>
+                </TooltipContent>
+            )}
+        </Tooltip>
+      </TooltipProvider>
+
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
