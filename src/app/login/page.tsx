@@ -14,7 +14,10 @@ import { ChevronLeft } from 'lucide-react';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
-        <path fillRule="evenodd" clipRule="evenodd" d="M12 1.5C6.48 1.5 2 5.98 2 12.5s4.48 11 10 11c5.52 0 10-4.48 10-11S17.52 1.5 12 1.5zM12 21.5c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9zm-2.7-9.04h7.4v-1.92h-7.4v1.92zm3.7-3.72c.98 0 1.8.82 1.8 1.8s-.82 1.8-1.8 1.8-1.8-.82-1.8-1.8.82-1.8 1.8-1.8z" fill="black" />
+        <path
+            d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.05 1.05-2.86 2.25-5.11 2.25-4.34 0-7.88-3.57-7.88-7.95s3.54-7.95 7.88-7.95c2.44 0 4.01.99 4.91 1.86l2.6-2.58C18.09 2.1 15.71 1 12.48 1 7.03 1 3 5.03 3 10.5s4.03 9.5 9.48 9.5c5.05 0 8.32-3.41 8.32-8.56 0-.52-.05-1.03-.12-1.5H12.48z"
+            fill="currentColor"
+        />
     </svg>
 );
 
@@ -62,7 +65,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-xl">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
-                <Logo className="gap-1" iconClassName="h-10 w-10" />
+                <Logo iconClassName="h-10 w-10" className="gap-1" />
             </div>
             <CardTitle className="font-headline text-3xl tracking-tight">Welcome to NextUp</CardTitle>
             <CardDescription>The smartest way to organize your tasks.</CardDescription>
