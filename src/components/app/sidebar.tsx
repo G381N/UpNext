@@ -109,7 +109,7 @@ export default function AppSidebar() {
               const FolderIcon = getIcon(folder.icon);
               return (
                 <SidebarMenuItem key={folder.id}>
-                  <Link href={`/folders/${folder.id}`} passHref legacyBehavior>
+                  <Link href={`/folders/${folder.id}`}>
                     <SidebarMenuButton
                       isActive={pathname === `/folders/${folder.id}`}
                       asChild
