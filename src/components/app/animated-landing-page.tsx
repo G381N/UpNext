@@ -77,7 +77,7 @@ const AnimatedLandingPage = () => {
             "absolute inset-0 flex items-center justify-center bg-card transition-opacity duration-500",
             showTasks ? 'opacity-0 z-0' : 'opacity-100 z-10'
         )}>
-            <Logo iconClassName="h-16 w-16" className="text-4xl animate-spring-in" />
+            <Logo iconClassName="h-12 w-12" className="text-4xl animate-spring-in" />
         </div>
 
         {/* Header */}
@@ -87,10 +87,12 @@ const AnimatedLandingPage = () => {
             <div className="h-3 w-3 rounded-full bg-yellow-400"></div>
             <div className="h-3 w-3 rounded-full bg-green-400"></div>
           </div>
-          <div className="w-full max-w-[40%] rounded-md bg-secondary px-2 py-1 text-center text-sm text-muted-foreground">
-            Nextup.gebin.net
+          <div className="flex-1 px-4">
+            <div className="w-full rounded-md bg-secondary px-2 py-1 text-center text-sm text-muted-foreground">
+              nextup.app
+            </div>
           </div>
-          <div />
+          <div className="w-12" />
         </div>
 
         {/* Content */}
