@@ -1,6 +1,8 @@
 import { Brain, Zap, ListChecks } from 'lucide-react';
 import AnimatedLandingPage from '@/components/app/animated-landing-page';
 import LandingHeader from '@/components/app/landing-header';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function LandingPage() {
   return (
@@ -76,19 +78,21 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="py-6 px-6 text-center text-muted-foreground">
-        <p>
-          Built by a friendly AI. Check out my human partner at{' '}
-          <a
-            href="https://gebin.net"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-foreground"
-          >
-            gebin.net
-          </a>
-          .
-        </p>
+      <footer className="border-t">
+        <div className="container mx-auto flex flex-col items-center justify-between gap-6 py-8 px-4 text-center sm:flex-row">
+          <p className="text-sm text-muted-foreground">
+            Built by <span className="font-semibold">Geben</span> with a little help from a friendly AI.
+          </p>
+          <Button variant="outline" asChild>
+            <a
+              href="https://gebin.net"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View Portfolio
+            </a>
+          </Button>
+        </div>
       </footer>
     </div>
   );
