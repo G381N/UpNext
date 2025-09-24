@@ -8,6 +8,9 @@ import { db } from '@/lib/firebase/config';
 import TaskItem from './task-item';
 import type { Task } from '@/types';
 import { Skeleton } from '../ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { Button } from '../ui/button';
+import { AlertCircle } from 'lucide-react';
 
 interface TaskListProps {
   folderId: string;
@@ -36,7 +39,27 @@ export default function TaskList({ folderId }: TaskListProps) {
   }
 
   if (error) {
-    return <p className="text-destructive">Error: {error.message}</p>;
+    const isIndexError = error.code === 'failed-precondition';
+    const firestoreIndexURL = `https://console.firebase.google.com/v1/r/project/${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}/firestore/indexes?create_composite=ClVwcm9qZWN0cy9zdHVkaW8tNDAyNTQ2ODQwOS05MGUxOC9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvdGFza3MvaW5kZXhlcy9fEAEaDAoIZm9sZGVySWQQARoJCgVvcmRlchABGgwKCF9fbmFtZV9fEAE`;
+
+    return (
+        <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error fetching tasks</AlertTitle>
+            <AlertDescription>
+                {isIndexError ? (
+                    <>
+                        <p className="mb-2">A Firestore index is required to sort and filter these tasks. Please create the index to continue.</p>
+                        <Button asChild>
+                            <a href={firestoreIndexURL} target="_blank" rel="noopener noreferrer">Create Index</a>
+                        </Button>
+                    </>
+                ) : (
+                    <p>{error.message}</p>
+                )}
+            </AlertDescription>
+        </Alert>
+    )
   }
 
   if (tasks?.empty) {
