@@ -34,6 +34,7 @@ export default function RootLayout({
           'font-body antialiased',
           GeistSans.variable
         )}
+        suppressHydrationWarning
       >
         <AuthProvider>
           {children}
