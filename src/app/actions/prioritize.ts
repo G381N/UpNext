@@ -2,7 +2,7 @@
 
 import { autoPrioritizeTasks, type Task as AiTask } from '@/ai/flows/auto-prioritize-tasks';
 import { db } from '@/lib/firebase/config';
-import { collection, getDocs, writeBatch, doc, query } from 'firebase/firestore';
+import { collection, getDocs, writeBatch, doc, query, where } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
 type FirestoreTask = {
@@ -19,7 +19,7 @@ export async function runTaskPrioritization(userId: string) {
 
   try {
     const tasksRef = collection(db, 'users', userId, 'tasks');
-    const q = query(tasksRef);
+    const q = query(tasksRef, where('completed', '==', false));
     const tasksSnapshot = await getDocs(q);
 
     if (tasksSnapshot.empty) {

@@ -32,41 +32,20 @@ export async function autoPrioritizeTasks(input: AutoPrioritizeTasksInput): Prom
   return autoPrioritizeTasksFlow(input);
 }
 
-const estimateTaskDurationTool = ai.defineTool({
-  name: 'estimateTaskDuration',
-  description: 'Estimates the duration and complexity of a task based on its description.',
-  inputSchema: z.object({
-    taskDescription: z.string().describe('The description of the task.'),
-  }),
-  outputSchema: z.number().describe('Estimated duration of the task in minutes.'),
-}, async (input) => {
-  // Placeholder implementation for estimating task duration.
-  // In a real application, this would use an AI model to analyze the task description.
-  // and estimate the duration.
-  // This example returns a random number between 15 and 60 minutes.
-  return Math.floor(Math.random() * (60 - 15 + 1)) + 15;
-});
-
 const prioritizeTasksPrompt = ai.definePrompt({
   name: 'prioritizeTasksPrompt',
-  tools: [estimateTaskDurationTool],
   input: {schema: AutoPrioritizeTasksInputSchema},
   output: {schema: AutoPrioritizeTasksOutputSchema},
   prompt: `You are an AI task prioritization expert.
 
-Given the following list of tasks, reorder them based on estimated duration and complexity, suggesting the most efficient next task to complete first. Use the estimateTaskDuration tool to estimate the duration of each task.
+Given the following list of tasks, reorder them based on urgency, importance, and complexity to suggest the most efficient order of completion.
 
 Tasks:
 {{#each this}}
 - ID: {{id}}, Title: {{title}}, Description: {{description}}
 {{/each}}
 
-Return the tasks in the order they should be completed, starting with the most efficient task.
-
-Output:
-{{#each this}}
-- ID: {{id}}, Title: {{title}}, Description: {{description}}
-{{/each}}`,
+Return the tasks in the order they should be completed, starting with the highest priority task. Do not modify the tasks, only reorder them.`,
 });
 
 const autoPrioritizeTasksFlow = ai.defineFlow(
@@ -75,18 +54,8 @@ const autoPrioritizeTasksFlow = ai.defineFlow(
     inputSchema: AutoPrioritizeTasksInputSchema,
     outputSchema: AutoPrioritizeTasksOutputSchema,
   },
-  async input => {
-    // Use the prompt to reorder the tasks
+  async (input) => {
     const {output} = await prioritizeTasksPrompt(input);
-
-    // Sort the tasks based on estimated duration (shortest first)
-    output!.sort((a, b) => {
-      // TODO: Get durations from tool calls instead of re-calling the tool.
-      const durationA = estimateTaskDurationTool({taskDescription: a.description || ''});
-      const durationB = estimateTaskDurationTool({taskDescription: b.description || ''});
-      return durationA - durationB;
-    });
-
     return output!;
   }
 );
