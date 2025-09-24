@@ -3,20 +3,13 @@
 import { db } from '@/lib/firebase/config';
 import { collection, writeBatch, doc, serverTimestamp } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
+import { extractTextFromImage } from '@/ai/flows/extract-text-from-image';
 
-// This is a placeholder for a real OCR implementation.
-async function ocrFromFile(file: File): Promise<string[]> {
-    console.log(`Simulating OCR for file: ${file.name}`);
-    // In a real app, you would upload the file and send it to an OCR service (e.g., Google Cloud Vision).
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network and processing time
-    
-    // Return dummy text as if read from an image
-    return [
-        "First item from image",
-        "Second item that was on the list",
-        "A third, very important task",
-        "Final task from the imported image",
-    ];
+// Helper to convert file to data URI
+async function fileToDataURI(file: File) {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    return `data:${file.type};base64,${buffer.toString('base64')}`;
 }
 
 export async function importTasksFromImage(formData: FormData, userId: string, folderId: string) {
@@ -27,9 +20,10 @@ export async function importTasksFromImage(formData: FormData, userId: string, f
     if (!folderId) return { success: false, error: 'No folder selected.' };
     
     try {
-        const taskTitles = await ocrFromFile(file);
+        const imageDataUri = await fileToDataURI(file);
+        const taskTitles = await extractTextFromImage({ imageDataUri });
 
-        if (taskTitles.length === 0) {
+        if (!taskTitles || taskTitles.length === 0) {
             return { success: true, count: 0, message: 'No text could be found in the image.' };
         }
 
