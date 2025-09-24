@@ -30,6 +30,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // This is to prevent a warning about a module not being found in the browser.
+    if (!isServer) {
+        config.resolve.fallback = {
+            ...config.resolve.fallback,
+            "fs": false,
+            "net": false,
+            "tls": false,
+        };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;
