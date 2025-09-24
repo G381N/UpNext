@@ -5,26 +5,29 @@ import React, { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
+import { Logo } from './logo';
 
 const AnimatedLandingPage = () => {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
     const sequence = [
-      () => setStep(1), // Intro: Show unsorted list
-      () => setStep(2), // Prioritize button glows
-      () => setStep(3), // Prioritizing animation starts
-      () => setStep(4), // Outro: Show sorted list
-      () => setStep(0), // Loop back to the start
+      () => setStep(1), // Intro: Show logo
+      () => setStep(2), // Show unsorted list
+      () => setStep(3), // Prioritize button glows
+      () => setStep(4), // Prioritizing animation starts
+      () => setStep(5), // Outro: Show sorted list
+      () => setStep(0), // Loop back to the start (logo)
     ];
 
     const timers = [
-      100,    // Initial delay
+      100,    // Initial delay before showing logo
+      2000,   // Show logo
       3000,   // Show unsorted list
       1500,   // Show prioritize button glow
       2500,   // Show "Prioritizing..." text
       4000,   // Show sorted list
-      1500,   // Reset
+      2500,   // Reset
     ];
 
     let currentStep = 0;
@@ -53,19 +56,30 @@ const AnimatedLandingPage = () => {
   ];
   
   const stepMessages = [
-    "Here's your to-do list...", // Step 0, 1
-    "Here's your to-do list...", // Step 1
-    "Let the AI get to work...", // Step 2
-    "Prioritizing based on impact and effort...", // Step 3
-    "Your prioritized list is ready!", // Step 4
+    "", // Step 0 (Logo)
+    "", // Step 1 (Logo)
+    "Here's your to-do list...", // Step 2
+    "Let the AI get to work...", // Step 3
+    "Prioritizing based on impact and effort...", // Step 4
+    "Your prioritized list is ready!", // Step 5
   ];
+
+  const showTasks = step >= 2 && step <= 5;
 
   return (
     <div className="relative mx-auto w-full max-w-4xl px-4 animate-fade-in-up" style={{animationDelay: '300ms'}}>
       <div
-        className="relative mx-auto flex min-h-[450px] w-full max-w-2xl flex-col items-center justify-start rounded-xl border-2 border-primary/10 bg-card shadow-2xl shadow-primary/5"
+        className="relative mx-auto flex min-h-[450px] w-full max-w-2xl flex-col items-center justify-center rounded-xl border-2 border-primary/10 bg-card shadow-2xl shadow-primary/5 transition-opacity duration-500"
         data-step={step}
       >
+        {/* Logo Intro/Outro */}
+        <div className={cn(
+            "absolute inset-0 flex items-center justify-center bg-card transition-opacity duration-500",
+            showTasks ? 'opacity-0 z-0' : 'opacity-100 z-10'
+        )}>
+            <Logo className="h-16 w-auto text-4xl animate-spring-in" />
+        </div>
+
         {/* Header */}
         <div className="flex w-full items-center justify-between border-b p-3">
           <div className="flex items-center gap-2">
@@ -82,7 +96,7 @@ const AnimatedLandingPage = () => {
         {/* Content */}
         <div className="w-full flex-1 p-4">
           <div className="mb-4 h-6 text-center text-sm font-medium text-muted-foreground transition-opacity duration-500">
-             {step > 0 && <p className="animate-fade-in-down">{stepMessages[step]}</p>}
+             {showTasks && <p className="animate-fade-in-down">{stepMessages[step]}</p>}
           </div>
           <div className="relative flex flex-col space-y-2">
             {tasks.map((task) => (
@@ -90,8 +104,8 @@ const AnimatedLandingPage = () => {
                 key={task.id}
                 className={cn(
                   'flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-all duration-1000 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)]',
-                   step >= 3 ? 'order-[var(--final-order)]' : 'order-[var(--initial-order)]',
-                   step > 0 ? 'opacity-100' : 'opacity-0',
+                   step >= 4 ? 'order-[var(--final-order)]' : 'order-[var(--initial-order)]',
+                   showTasks ? 'opacity-100' : 'opacity-0',
                    'animate-spring-in'
                 )}
                 style={{
@@ -102,13 +116,13 @@ const AnimatedLandingPage = () => {
               >
                 <div className={cn(
                     'h-5 w-5 flex-shrink-0 rounded-sm border-2 border-muted transition-all duration-500',
-                     step === 4 && 'animate-check-fill'
+                     step === 5 && 'animate-check-fill'
                 )}>
                 </div>
                 <span className="flex-1 text-sm font-medium text-card-foreground">
                   {task.title}
                 </span>
-                {step === 4 && (
+                {step === 5 && (
                      <Check className="h-4 w-4 text-green-500 opacity-0 animate-fade-in" style={{animationDelay: `calc(var(--final-order) * 200ms + 1000ms)`}}/>
                 )}
               </div>
@@ -118,9 +132,9 @@ const AnimatedLandingPage = () => {
 
         {/* Footer */}
         <div className="w-full border-t p-3 text-center">
-            <div className={cn("transition-all duration-500", (step >= 2) ? 'opacity-100' : 'opacity-0')}>
-                {step < 3 ? (
-                    <Button variant="outline" size="sm" className={cn(step === 2 && 'animate-glow-shadow-sm')}>
+            <div className={cn("transition-all duration-500", (step >= 3) ? 'opacity-100' : 'opacity-0')}>
+                {step < 4 ? (
+                    <Button variant="outline" size="sm" className={cn(step === 3 && 'animate-glow-shadow-sm')}>
                         Prioritize with AI
                     </Button>
                 ) : (
