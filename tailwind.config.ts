@@ -125,6 +125,10 @@ export default {
             '0%, 100%': { 'box-shadow': '0 0 4px hsl(var(--primary))' },
             '50%': { 'box-shadow': '0 0 8px hsl(var(--primary))' },
         },
+        'glow': {
+          '0%, 100%': { 'text-shadow': '0 0 4px hsl(var(--foreground)), 0 0 8px hsl(var(--foreground))' },
+          '50%': { 'text-shadow': '0 0 8px hsl(var(--foreground)), 0 0 16px hsl(var(--foreground))' },
+        },
         'spring-in': {
           '0%': {
             opacity: '0',
@@ -149,6 +153,7 @@ export default {
         'check-fill': 'check-fill 0.4s ease-in-out forwards 1s',
         'glow-shadow-sm': 'glow-shadow-sm 1.5s ease-in-out infinite',
         'spring-in': 'spring-in 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
+        'glow': 'glow 1.5s ease-in-out infinite',
       },
     },
   },

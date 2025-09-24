@@ -23,9 +23,9 @@ const AnimatedLandingPage = () => {
     const timers = [
       100,    // Initial delay before showing logo
       2000,   // Show logo
-      3000,   // Show unsorted list
-      1500,   // Show "Prioritizing..." text
-      2500,   // Show "Prioritizing..." text
+      3000,   // Show unsorted list and "Let the AI figure out..."
+      3000,   // Hold on "Let the AI figure out..."
+      2500,   // Show "Prioritizing..."
       4000,   // Show sorted list
       2500,   // Reset
     ];
@@ -59,7 +59,7 @@ const AnimatedLandingPage = () => {
     "", // Step 0 (Logo)
     "", // Step 1 (Logo)
     "Here is your to-do list for the day.", // Step 2
-    "Let the AI figure out what's next up...", // Step 3
+    <span key="step3-message">Let the AI figure out what's <span className="animate-glow font-medium text-foreground">next up</span>...</span>, // Step 3
     "Prioritizing based on impact and effort...", // Step 4
     "Your prioritized list is ready!", // Step 5
   ];
@@ -77,7 +77,7 @@ const AnimatedLandingPage = () => {
             "absolute inset-0 flex items-center justify-center bg-card transition-opacity duration-500",
             showTasks ? 'opacity-0 z-0' : 'opacity-100 z-10'
         )}>
-            <Logo iconClassName="h-12 w-12" className="text-4xl animate-spring-in" />
+            <Logo iconClassName="h-10 w-10" className="text-4xl animate-spring-in" />
         </div>
 
         {/* Header */}
@@ -98,7 +98,7 @@ const AnimatedLandingPage = () => {
         {/* Content */}
         <div className="w-full flex-1 p-4">
           <div className="mb-4 h-6 text-center text-sm font-medium text-muted-foreground transition-opacity duration-500">
-             {showTasks && <p className="animate-fade-in-down">{stepMessages[step]}</p>}
+             {showTasks && <div className="animate-fade-in-down">{stepMessages[step]}</div>}
           </div>
           <div className="relative flex flex-col gap-2">
             {tasks.map((task) => (
