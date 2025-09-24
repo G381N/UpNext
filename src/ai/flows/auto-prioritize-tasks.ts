@@ -45,7 +45,7 @@ Tasks:
 - ID: {{id}}, Title: {{title}}, Description: {{description}}
 {{/each}}
 
-Return the tasks in the order they should be completed, starting with the highest priority task. Do not modify the tasks, only reorder them.`,
+Return the tasks in the order they should be completed, starting with the highest priority task. You must return all fields for each task, including the ID. Do not modify the tasks, only reorder them.`,
 });
 
 const autoPrioritizeTasksFlow = ai.defineFlow(

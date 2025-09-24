@@ -15,7 +15,6 @@ import {
   SidebarGroupLabel,
 } from '@/components/ui/sidebar';
 import {
-  Folder as FolderIcon,
   FolderPlus,
   PlusCircle,
 } from 'lucide-react';
@@ -30,6 +29,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { FolderForm } from './folder-form';
 import { TaskForm } from './task-form';
 import { Button } from '../ui/button';
+import { getIcon } from '@/lib/icons';
 
 export default function AppSidebar() {
   const { user } = useAuth();
@@ -106,19 +106,20 @@ export default function AppSidebar() {
             )}
             {folders?.docs.map((doc) => {
               const folder = { id: doc.id, ...doc.data() } as Folder;
+              const FolderIcon = getIcon(folder.icon);
               return (
                 <SidebarMenuItem key={folder.id}>
-                  <Link href={`/folders/${folder.id}`} passHref>
+                  <Link href={`/folders/${folder.id}`} passHref legacyBehavior>
                     <SidebarMenuButton
                       isActive={pathname === `/folders/${folder.id}`}
                       asChild
                       size="sm"
                       tooltip={{ children: folder.name, side: 'right' }}
                     >
-                      <span>
+                      <a>
                         <FolderIcon />
                         <span>{folder.name}</span>
-                      </span>
+                      </a>
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
