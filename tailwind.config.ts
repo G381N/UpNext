@@ -126,10 +126,18 @@ export default {
             '50%': { 'box-shadow': '0 0 8px hsl(var(--primary))' },
         },
         'spring-in': {
-            '0%': { opacity: '0', transform: 'scale(0.9) translateY(10px)' },
-            '50%': { opacity: '1', transform: 'scale(1.05)' },
-            '100%': { transform: 'scale(1) translateY(0)' },
-        }
+          '0%': {
+            opacity: '0',
+            transform: 'scale(0.8) translateY(20px)',
+          },
+          '70%': {
+            opacity: '1',
+            transform: 'scale(1.05) translateY(0)',
+          },
+          '100%': {
+            transform: 'scale(1) translateY(0)',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -140,7 +148,7 @@ export default {
         'typing': 'typing 1.5s steps(30, end) forwards',
         'check-fill': 'check-fill 0.4s ease-in-out forwards 1s',
         'glow-shadow-sm': 'glow-shadow-sm 1.5s ease-in-out infinite',
-        'spring-in': 'spring-in 0.6s both',
+        'spring-in': 'spring-in 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
       },
     },
   },
