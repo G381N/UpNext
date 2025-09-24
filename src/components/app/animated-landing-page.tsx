@@ -98,7 +98,7 @@ const AnimatedLandingPage = () => {
           <div className="mb-4 h-6 text-center text-sm font-medium text-muted-foreground transition-opacity duration-500">
              {showTasks && <p className="animate-fade-in-down">{stepMessages[step]}</p>}
           </div>
-          <div className="relative flex flex-col space-y-2">
+          <div className="relative flex flex-col gap-2">
             {tasks.map((task) => (
               <div
                 key={task.id}
