@@ -1,3 +1,5 @@
+'use client'
+
 import { getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import type { Folder } from '@/types';
@@ -8,21 +10,6 @@ import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/co
 import { Button } from '@/components/ui/button';
 import { FolderCog } from 'lucide-react';
 import { FolderForm } from '@/components/app/folder-form';
-
-async function getFolderData(userId: string, folderId: string): Promise<Folder | null> {
-    // For now, we can't get userId on the server easily without the admin SDK.
-    // This component will need to be a client component to get user from useAuth
-    // Or we need a server-side auth solution.
-    // For this implementation, we will assume a client component.
-    // However, the prompt favors server components. So let's imagine we can get the user.
-    // A real app would use Firebase Admin SDK in a server route or check session cookies.
-    // This function will not work as is without a way to get the current user's ID securely on the server.
-    // I'll rewrite this as a client component.
-  return null;
-}
-
-// Rewriting as a client component to handle auth and data fetching
-'use client'
 import { useAuth } from '@/hooks/use-auth';
 import React, { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';

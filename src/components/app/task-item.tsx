@@ -14,7 +14,6 @@ import { useCollection } from 'react-firebase-hooks/firestore';
 import { collection, query, where, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { cn } from '@/lib/utils';
-import { revalidatePath } from 'next/cache';
 
 interface TaskItemProps {
   task: Task;
