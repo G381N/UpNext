@@ -276,7 +276,7 @@ export default function AppHeader() {
           onClick={handlePrioritize}
           disabled={isPrioritizing}
         >
-          <Bolt className={cn("mr-2 h-4 w-4", isPrioritizing && "animate-[spin_2s_linear_infinite]")} />
+          <Bolt className={cn("mr-2 h-4 w-4", isPrioritizing && "animate-spin")} />
           {isPrioritizing ? 'Prioritizing...' : 'Prioritize'}
         </Button>
 
