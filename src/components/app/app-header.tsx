@@ -19,7 +19,7 @@ import { TaskForm } from './task-form';
 import { useCollection } from 'react-firebase-hooks/firestore';
 import { collection, query, where, writeBatch, doc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import type { Folder } from '@/types';
+import type { Folder, Task } from '@/types';
 import { importTasksFromImage } from '@/app/actions/ocr';
 import { usePathname } from 'next/navigation';
 import { Input } from '../ui/input';
@@ -223,7 +223,15 @@ export default function AppHeader() {
     if (!user) return;
     startTransition(async () => {
       const userTasksSnapshot = await getDocs(query(collection(db, 'users', user.uid, 'tasks'), where('completed', '==', false)));
-      const userTasks = userTasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
+      
+      const userTasks = userTasksSnapshot.docs.map(doc => {
+        const data = doc.data() as Task;
+        return { 
+            id: doc.id,
+            title: data.title,
+            description: data.description || ''
+        };
+      });
 
       try {
         toast({ title: 'Prioritizing Tasks...', description: 'Our AI is re-ordering your tasks for optimal productivity.' });
