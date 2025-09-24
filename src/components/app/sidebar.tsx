@@ -31,7 +31,6 @@ import { UserNav } from './user-nav';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { FolderForm } from './folder-form';
 import { TaskForm } from './task-form';
-import { Button } from '../ui/button';
 import { getIcon } from '@/lib/icons';
 import { cn } from '@/lib/utils';
 
@@ -95,13 +94,13 @@ export default function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Actions</SidebarGroupLabel>
           <SidebarMenu>
-            <SidebarMenuItem>
+             <SidebarMenuItem>
               <Sheet open={isTaskSheetOpen} onOpenChange={setIsTaskSheetOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    {state === 'expanded' && <span>New Task</span>}
-                  </Button>
+                  <SidebarMenuButton tooltip={{ children: 'New Task', side: 'right' }}>
+                    <PlusCircle />
+                    <span>New Task</span>
+                  </SidebarMenuButton>
                 </SheetTrigger>
                 <SheetContent>
                   <SheetHeader>
@@ -118,10 +117,10 @@ export default function AppSidebar() {
             <SidebarMenuItem>
                <Sheet open={isFolderSheetOpen} onOpenChange={setIsFolderSheetOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-start">
-                    <FolderPlus className="mr-2 h-4 w-4" />
-                     {state === 'expanded' && <span>New Folder</span>}
-                  </Button>
+                  <SidebarMenuButton tooltip={{ children: 'New Folder', side: 'right' }}>
+                    <FolderPlus />
+                    <span>New Folder</span>
+                  </SidebarMenuButton>
                 </SheetTrigger>
                 <SheetContent>
                   <SheetHeader>
