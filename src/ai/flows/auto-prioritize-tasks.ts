@@ -38,14 +38,14 @@ const prioritizeTasksPrompt = ai.definePrompt({
   output: {schema: AutoPrioritizeTasksOutputSchema},
   prompt: `You are an AI task prioritization expert.
 
-Given the following list of tasks, reorder them based on urgency, importance, and complexity to suggest the most efficient order of completion.
+Given the following list of tasks, reorder them to prioritize the fastest and easiest tasks first, while also considering their importance. The goal is to complete significant tasks quickly and build momentum.
 
 Tasks:
 {{#each this}}
 - ID: {{id}}, Title: {{title}}, Description: {{description}}
 {{/each}}
 
-Return the tasks in the order they should be completed, starting with the highest priority task. You must return all fields for each task, including the ID. Do not modify the tasks, only reorder them.`,
+Return the tasks in the order they should be completed, starting with the highest priority (quickest, easiest, most important) task. You must return all fields for each task, including the ID. Do not modify the tasks, only reorder them.`,
 });
 
 const autoPrioritizeTasksFlow = ai.defineFlow(
