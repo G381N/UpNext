@@ -77,7 +77,7 @@ const AnimatedLandingPage = () => {
             "absolute inset-0 flex items-center justify-center bg-card transition-opacity duration-500",
             showTasks ? 'opacity-0 z-0' : 'opacity-100 z-10'
         )}>
-            <Logo className="h-16 w-auto text-4xl animate-spring-in" />
+            <Logo className="h-20 w-auto text-5xl animate-spring-in" />
         </div>
 
         {/* Header */}
