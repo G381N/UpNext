@@ -128,18 +128,16 @@ export default function AppSidebar() {
               const FolderIcon = getIcon(folder.icon);
               return (
                 <SidebarMenuItem key={folder.id}>
-                  <Link href={`/folders/${folder.id}`} legacyBehavior passHref>
-                    <SidebarMenuButton
-                      isActive={pathname === `/folders/${folder.id}`}
-                      asChild
-                      tooltip={{ children: folder.name, side: 'right' }}
-                    >
-                      <a>
-                        <FolderIcon className="h-4 w-4" />
-                        <span>{folder.name}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </Link>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === `/folders/${folder.id}`}
+                    tooltip={{ children: folder.name, side: 'right' }}
+                  >
+                    <Link href={`/folders/${folder.id}`}>
+                      <FolderIcon className="h-4 w-4" />
+                      <span>{folder.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
                    <FolderSettingsSheet folder={folder}>
                       <SidebarMenuAction showOnHover>
                           <Settings />
