@@ -16,7 +16,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useTransition } from 'react';
-import { createTask, updateTask } from '@/app/actions/tasks';
 import { useToast } from '@/hooks/use-toast';
 import type { Task, Folder } from '@/types';
 import {
@@ -27,6 +26,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { usePathname } from 'next/navigation';
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Task title is required.'),
@@ -59,13 +60,28 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
   });
 
   const onSubmit = (values: TaskFormValues) => {
+    if (!userId) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'You must be logged in to create or update a task.'
+        });
+        return;
+    }
     startTransition(async () => {
       try {
         if (task) {
-          await updateTask(task.id, userId, values);
+          const taskRef = doc(db, 'users', userId, 'tasks', task.id);
+          await updateDoc(taskRef, values);
           toast({ title: 'Success', description: 'Task updated successfully.' });
         } else {
-          await createTask(userId, values);
+          await addDoc(collection(db, 'users', userId, 'tasks'), {
+            ...values,
+            userId,
+            completed: false,
+            order: Date.now(),
+            createdAt: serverTimestamp(),
+          });
           toast({ title: 'Success', description: 'Task created successfully.' });
         }
         onSuccess?.();

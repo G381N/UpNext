@@ -17,9 +17,10 @@ import { Input } from '@/components/ui/input';
 import { IconPicker } from './icon-picker';
 import { iconNames } from '@/lib/icons';
 import { useTransition } from 'react';
-import { createFolder, updateFolder } from '@/app/actions/folders';
 import { useToast } from '@/hooks/use-toast';
 import type { Folder } from '@/types';
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
 const folderSchema = z.object({
   name: z.string().min(1, 'Folder name is required.'),
@@ -47,22 +48,27 @@ export function FolderForm({ userId, folder, onSuccess }: FolderFormProps) {
   });
 
   const onSubmit = (values: FolderFormValues) => {
+    if (!userId) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'You must be logged in to create or update a folder.'
+        });
+        return;
+    }
     startTransition(async () => {
       try {
         if (folder) {
-          const result = await updateFolder(folder.id, userId, values);
-          if (result.success) {
-            toast({ title: 'Success', description: 'Folder updated successfully.' });
-          } else {
-            throw new Error(result.error);
-          }
+          const folderRef = doc(db, 'users', userId, 'folders', folder.id);
+          await updateDoc(folderRef, values);
+          toast({ title: 'Success', description: 'Folder updated successfully.' });
         } else {
-          const result = await createFolder(userId, values);
-           if (result.success) {
-            toast({ title: 'Success', description: 'Folder created successfully.' });
-          } else {
-            throw new Error(result.error);
-          }
+          await addDoc(collection(db, 'users', userId, 'folders'), {
+            ...values,
+            userId,
+            createdAt: serverTimestamp(),
+          });
+          toast({ title: 'Success', description: 'Folder created successfully.' });
         }
         onSuccess?.();
       } catch (error) {

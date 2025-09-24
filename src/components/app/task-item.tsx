@@ -6,15 +6,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
 import type { Task, Folder } from '@/types';
-import { deleteTask, toggleTaskCompletion } from '@/app/actions/tasks';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 import { TaskForm } from './task-form';
 import { useCollection } from 'react-firebase-hooks/firestore';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { cn } from '@/lib/utils';
+import { revalidatePath } from 'next/cache';
 
 interface TaskItemProps {
   task: Task;
@@ -34,7 +34,8 @@ export default function TaskItem({ task }: TaskItemProps) {
     if (!user) return;
     startTransition(async () => {
       try {
-        await toggleTaskCompletion(task.id, user.uid, task.folderId);
+        const taskRef = doc(db, 'users', user.uid, 'tasks', task.id);
+        await updateDoc(taskRef, { completed: !task.completed });
       } catch (e) {
         toast({
           variant: 'destructive',
@@ -49,7 +50,8 @@ export default function TaskItem({ task }: TaskItemProps) {
     if (!user) return;
     startTransition(async () => {
       try {
-        await deleteTask(task.id, user.uid, task.folderId);
+        const taskRef = doc(db, 'users', user.uid, 'tasks', task.id);
+        await deleteDoc(taskRef);
         toast({ title: 'Task deleted' });
       } catch (e) {
         toast({

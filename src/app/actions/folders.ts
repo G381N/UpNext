@@ -11,56 +11,6 @@ const folderSchema = z.object({
   icon: z.string().refine((val) => iconNames.includes(val), 'Invalid icon.'),
 });
 
-export async function createFolder(
-  userId: string,
-  values: z.infer<typeof folderSchema>
-) {
-  try {
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-
-    const validatedValues = folderSchema.parse(values);
-
-    await addDoc(collection(db, 'users', userId, 'folders'), {
-      ...validatedValues,
-      userId,
-      createdAt: serverTimestamp(),
-    });
-
-    revalidatePath('/', 'layout');
-    return { success: true };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "An unknown error occurred.";
-    console.error("Error creating folder:", message);
-    return { success: false, error: message };
-  }
-}
-
-export async function updateFolder(
-  folderId: string,
-  userId: string,
-  values: z.infer<typeof folderSchema>
-) {
-  try {
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-
-    const validatedValues = folderSchema.parse(values);
-    const folderRef = doc(db, 'users', userId, 'folders', folderId);
-
-    await updateDoc(folderRef, validatedValues);
-
-    revalidatePath('/', 'layout');
-    return { success: true };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "An unknown error occurred.";
-    console.error("Error updating folder:", message);
-    return { success: false, error: message };
-  }
-}
-
 export async function deleteFolder(folderId: string, userId: string) {
     try {
         if (!userId) {
