@@ -10,42 +10,34 @@ const AnimatedLandingPage = () => {
 
   useEffect(() => {
     const sequence = [
-      () => setStep(1), // Initial state
-      () => setStep(2), // Typing task
-      () => setStep(3), // Voice and Image appear
-      () => setStep(4), // Tasks from Voice and Image added
-      () => setStep(5), // Prioritize button glows
-      () => setStep(6), // Prioritizing animation
-      () => setStep(7), // Sorted state
-      () => setStep(0), // Loop back
+      () => setStep(1), // All tasks visible
+      () => setStep(2), // Prioritize button glows
+      () => setStep(3), // Prioritizing animation
+      () => setStep(4), // Sorted state
+      () => setStep(0), // Loop back to the start
     ];
 
     const timers = [
-      100, // delay before start
-      2000, // duration of typing
-      1500, // duration for voice/image icons
-      2000, // show new tasks
-      1500, // show prioritize button
-      2500, // prioritizing...
-      4000, // show sorted list
-      1000, // reset
+      100,    // Initial delay
+      2000,   // Show tasks and wait
+      1500,   // Show prioritize button glow
+      2500,   // "Prioritizing..." text
+      4000,   // Show sorted list
+      1000,   // Reset
     ];
 
     let currentStep = 0;
     let timer: NodeJS.Timeout;
     
     const runSequence = () => {
-      if (currentStep < sequence.length) {
-        timer = setTimeout(() => {
-          sequence[currentStep]();
-          currentStep++;
-          runSequence();
-        }, timers[currentStep]);
-      } else {
-        // Loop
-        currentStep = 0;
+      // Loop sequence
+      const stepIndex = currentStep % sequence.length;
+      
+      timer = setTimeout(() => {
+        sequence[stepIndex]();
+        currentStep++;
         runSequence();
-      }
+      }, timers[stepIndex]);
     };
 
     runSequence();
@@ -56,10 +48,10 @@ const AnimatedLandingPage = () => {
   const isVisible = (s: number) => step >= s;
 
   const tasks = [
-    { id: 1, title: 'Draft quarterly report', initialOrder: 1, finalOrder: 4, type: 'typed', stepAdded: 2 },
-    { id: 2, title: 'Quick call with the design team', initialOrder: 2, finalOrder: 1, type: 'voice', stepAdded: 4 },
-    { id: 3, title: 'Integrate new API for event', initialOrder: 3, finalOrder: 3, type: 'image', stepAdded: 4 },
-    { id: 4, title: 'Reply to support email', initialOrder: 4, finalOrder: 2, type: 'image', stepAdded: 4 },
+    { id: 1, title: 'Draft quarterly report', initialOrder: 1, finalOrder: 4, stepAdded: 1 },
+    { id: 2, title: 'Quick call with the design team', initialOrder: 2, finalOrder: 1, stepAdded: 1 },
+    { id: 3, title: 'Integrate new API for event', initialOrder: 3, finalOrder: 3, stepAdded: 1 },
+    { id: 4, title: 'Reply to support email', initialOrder: 4, finalOrder: 2, stepAdded: 1 },
   ];
 
   return (
@@ -83,43 +75,29 @@ const AnimatedLandingPage = () => {
 
         {/* Content */}
         <div className="w-full flex-1 p-4">
-          <div className="relative flex flex-col space-y-2 transition-all duration-1000" style={{ transform: step >= 6 ? 'translateY(0)' : 'translateY(0)' }}>
+          <div className="relative flex flex-col space-y-2">
             {tasks.map((task) => (
               <div
                 key={task.id}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-all duration-1000',
-                  step >= 6 ? 'order-[var(--final-order)]' : 'order-[var(--initial-order)]',
-                  'opacity-0 translate-y-4',
-                   isVisible(task.stepAdded) && 'animate-fade-in-up',
+                  'flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-all duration-1000 ease-in-out',
+                  step >= 3 ? 'order-[var(--final-order)]' : 'order-[var(--initial-order)]',
                 )}
                 style={{
                     '--initial-order': task.initialOrder,
                     '--final-order': task.finalOrder,
-                    'animationDelay': isVisible(task.stepAdded) && step < task.stepAdded + 1 ? '0ms' : '10000ms',
                 } as React.CSSProperties}
               >
                 <div className={cn(
                     'h-5 w-5 flex-shrink-0 rounded-sm border-2 border-muted transition-all duration-500',
-                    step === 7 && 'animate-check-fill-delayed'
+                    step === 4 && 'animate-check-fill-delayed'
                 )}>
                 </div>
                 <span className="flex-1 text-sm font-medium text-card-foreground">
-                  {task.id === 1 && step < 2 ? (
-                    <span className="animate-typing">Draft quarterly report</span>
-                  ) : (
-                    task.title
-                  )}
+                  {task.title}
                 </span>
-                {step > 2 && step < 5 && (
-                    <div className={cn('transition-opacity duration-300', isVisible(3) ? 'opacity-100' : 'opacity-0' )}>
-                        {task.type === 'voice' && <Mic className="h-4 w-4 text-muted-foreground" />}
-                        {task.type === 'image' && <Image className="h-4 w-4 text-muted-foreground" />}
-                        {task.type === 'typed' && <Plus className="h-4 w-4 text-muted-foreground" />}
-                    </div>
-                )}
-                {step === 7 && (
-                     <Check className="h-4 w-4 text-green-500 opacity-0 animate-fade-in" style={{animationDelay: `var(--final-order) * 200ms + 1000ms`}}/>
+                {step === 4 && (
+                     <Check className="h-4 w-4 text-green-500 opacity-0 animate-fade-in" style={{animationDelay: `calc(var(--final-order) * 200ms + 1000ms)`}}/>
                 )}
               </div>
             ))}
@@ -128,9 +106,9 @@ const AnimatedLandingPage = () => {
 
         {/* Footer */}
         <div className="w-full border-t p-3 text-center">
-            <div className={cn("transition-all duration-500", (step === 5 || step === 6) ? 'opacity-100' : 'opacity-0')}>
-                {step < 6 ? (
-                    <Button variant="outline" size="sm" className={cn(step === 5 && 'animate-glow-shadow-sm')}>
+            <div className={cn("transition-all duration-500", (isVisible(2)) ? 'opacity-100' : 'opacity-0')}>
+                {step < 3 ? (
+                    <Button variant="outline" size="sm" className={cn(step === 2 && 'animate-glow-shadow-sm')}>
                         Prioritize with AI
                     </Button>
                 ) : (
