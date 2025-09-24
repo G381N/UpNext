@@ -24,7 +24,7 @@ const AnimatedLandingPage = () => {
       100,    // Initial delay before showing logo
       2000,   // Show logo
       3000,   // Show unsorted list
-      1500,   // Show prioritize button glow
+      1500,   // Show "Prioritizing..." text
       2500,   // Show "Prioritizing..." text
       4000,   // Show sorted list
       2500,   // Reset
