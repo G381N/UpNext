@@ -58,8 +58,8 @@ const AnimatedLandingPage = () => {
   const stepMessages = [
     "", // Step 0 (Logo)
     "", // Step 1 (Logo)
-    "Here's your to-do list...", // Step 2
-    "Let the AI get to work...", // Step 3
+    "Here is your to-do list for the day.", // Step 2
+    "Let the AI figure out what's next up...", // Step 3
     "Prioritizing based on impact and effort...", // Step 4
     "Your prioritized list is ready!", // Step 5
   ];
@@ -88,7 +88,7 @@ const AnimatedLandingPage = () => {
             <div className="h-3 w-3 rounded-full bg-green-400"></div>
           </div>
           <div className="w-full max-w-[40%] rounded-md bg-secondary px-2 py-1 text-center text-sm text-muted-foreground">
-            My Tasks
+            Nextup.gebin.net
           </div>
           <div />
         </div>
