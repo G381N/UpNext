@@ -32,19 +32,25 @@ const AnimatedLandingPage = () => {
     ];
 
     let currentStep = 0;
+    let timer: NodeJS.Timeout;
+    
     const runSequence = () => {
       if (currentStep < sequence.length) {
-        const timer = setTimeout(() => {
+        timer = setTimeout(() => {
           sequence[currentStep]();
           currentStep++;
           runSequence();
         }, timers[currentStep]);
-        return () => clearTimeout(timer);
+      } else {
+        // Loop
+        currentStep = 0;
+        runSequence();
       }
     };
 
-    const cleanup = runSequence();
-    return cleanup;
+    runSequence();
+
+    return () => clearTimeout(timer);
   }, []);
 
   const isVisible = (s: number) => step >= s;
@@ -77,20 +83,20 @@ const AnimatedLandingPage = () => {
 
         {/* Content */}
         <div className="w-full flex-1 p-4">
-          <div className="relative space-y-2">
+          <div className="relative flex flex-col space-y-2 transition-all duration-1000" style={{ transform: step >= 6 ? 'translateY(0)' : 'translateY(0)' }}>
             {tasks.map((task) => (
               <div
                 key={task.id}
                 className={cn(
                   'flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-all duration-1000',
-                  'group-data-[step="7"]:order-[var(--final-order)]',
+                  step >= 6 ? 'order-[var(--final-order)]' : 'order-[var(--initial-order)]',
                   'opacity-0 translate-y-4',
                    isVisible(task.stepAdded) && 'animate-fade-in-up',
                 )}
                 style={{
                     '--initial-order': task.initialOrder,
                     '--final-order': task.finalOrder,
-                    'animationDelay': isVisible(task.stepAdded) ? '0ms' : '10000ms',
+                    'animationDelay': isVisible(task.stepAdded) && step < task.stepAdded + 1 ? '0ms' : '10000ms',
                 } as React.CSSProperties}
               >
                 <div className={cn(
@@ -106,14 +112,14 @@ const AnimatedLandingPage = () => {
                   )}
                 </span>
                 {step > 2 && step < 5 && (
-                    <div className="opacity-0 group-data-[step='3']:animate-fade-in">
+                    <div className={cn('transition-opacity duration-300', isVisible(3) ? 'opacity-100' : 'opacity-0' )}>
                         {task.type === 'voice' && <Mic className="h-4 w-4 text-muted-foreground" />}
                         {task.type === 'image' && <Image className="h-4 w-4 text-muted-foreground" />}
                         {task.type === 'typed' && <Plus className="h-4 w-4 text-muted-foreground" />}
                     </div>
                 )}
                 {step === 7 && (
-                     <Check className="h-4 w-4 text-green-500 opacity-0 animate-fade-in" style={{animationDelay: `${task.finalOrder * 200 + 1000}ms`}}/>
+                     <Check className="h-4 w-4 text-green-500 opacity-0 animate-fade-in" style={{animationDelay: `var(--final-order) * 200ms + 1000ms`}}/>
                 )}
               </div>
             ))}
