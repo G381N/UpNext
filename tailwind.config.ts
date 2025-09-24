@@ -90,14 +90,31 @@ export default {
           },
         },
         'bob': {
-          '0%, 100%': { transform: 'translateY(-2%)' },
-          '50%': { transform: 'translateY(2%)' },
+          '0%, 100%': { transform: 'translateY(-2%) scale(1)' },
+          '50%': { transform: 'translateY(2%) scale(1.02)' },
+        },
+        'fade-in-right': {
+            '0%': {
+                opacity: '0',
+                transform: 'var(--initial-transform)',
+            },
+            '100%': {
+                opacity: '1',
+                transform: 'var(--final-transform)',
+            },
+        },
+        'check-fill': {
+            '0%': { 'background-color': 'transparent' },
+            '25%': { 'background-color': 'hsl(var(--primary))', 'border-color': 'hsl(var(--primary))' },
+            '100%': { 'background-color': 'hsl(var(--primary))', 'border-color': 'hsl(var(--primary))' },
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'bob': 'bob 2s ease-in-out infinite',
+        'bob': 'bob 3s ease-in-out infinite var(--delay)',
+        'fade-in-right': 'fade-in-right var(--duration) ease-in-out forwards var(--delay)',
+        'check-fill': 'check-fill 1s ease-in-out 1.2s forwards',
       },
     },
   },
