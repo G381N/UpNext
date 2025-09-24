@@ -31,6 +31,9 @@ import {
     Bell,
     Archive,
     Trash2,
+    Palette,
+    BriefcaseBusiness,
+    List,
     type LucideIcon,
   } from 'lucide-react';
   
@@ -65,8 +68,9 @@ import {
     Compass,
     Settings,
     Bell,
-    Archive,
-    Trash2,
+    Palette,
+    BriefcaseBusiness,
+    List,
   };
   
   export const iconNames = Object.keys(iconLibrary);
