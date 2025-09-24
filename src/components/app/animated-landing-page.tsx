@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Image, Mic, Plus, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 
@@ -10,27 +11,26 @@ const AnimatedLandingPage = () => {
 
   useEffect(() => {
     const sequence = [
-      () => setStep(1), // All tasks visible
+      () => setStep(1), // Intro: Show unsorted list
       () => setStep(2), // Prioritize button glows
-      () => setStep(3), // Prioritizing animation
-      () => setStep(4), // Sorted state
+      () => setStep(3), // Prioritizing animation starts
+      () => setStep(4), // Outro: Show sorted list
       () => setStep(0), // Loop back to the start
     ];
 
     const timers = [
       100,    // Initial delay
-      2000,   // Show tasks and wait
+      3000,   // Show unsorted list
       1500,   // Show prioritize button glow
-      2500,   // "Prioritizing..." text
+      2500,   // Show "Prioritizing..." text
       4000,   // Show sorted list
-      1000,   // Reset
+      1500,   // Reset
     ];
 
     let currentStep = 0;
     let timer: NodeJS.Timeout;
     
     const runSequence = () => {
-      // Loop sequence
       const stepIndex = currentStep % sequence.length;
       
       timer = setTimeout(() => {
@@ -45,19 +45,25 @@ const AnimatedLandingPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const isVisible = (s: number) => step >= s;
-
   const tasks = [
-    { id: 1, title: 'Draft quarterly report', initialOrder: 1, finalOrder: 4, stepAdded: 1 },
-    { id: 2, title: 'Quick call with the design team', initialOrder: 2, finalOrder: 1, stepAdded: 1 },
-    { id: 3, title: 'Integrate new API for event', initialOrder: 3, finalOrder: 3, stepAdded: 1 },
-    { id: 4, title: 'Reply to support email', initialOrder: 4, finalOrder: 2, stepAdded: 1 },
+    { id: 1, title: 'Draft quarterly report', initialOrder: 1, finalOrder: 4 },
+    { id: 2, title: 'Quick call with the design team', initialOrder: 2, finalOrder: 1 },
+    { id: 3, title: 'Integrate new API for event', initialOrder: 3, finalOrder: 3 },
+    { id: 4, title: 'Reply to support email', initialOrder: 4, finalOrder: 2 },
+  ];
+  
+  const stepMessages = [
+    "Here's your to-do list...", // Step 0, 1
+    "Here's your to-do list...", // Step 1
+    "Let the AI get to work...", // Step 2
+    "Prioritizing based on impact and effort...", // Step 3
+    "Your prioritized list is ready!", // Step 4
   ];
 
   return (
     <div className="relative mx-auto w-full max-w-4xl px-4">
       <div
-        className="relative mx-auto flex min-h-[400px] w-full max-w-2xl flex-col items-center justify-start rounded-xl border-2 border-primary/10 bg-card shadow-2xl shadow-primary/5"
+        className="relative mx-auto flex min-h-[450px] w-full max-w-2xl flex-col items-center justify-start rounded-xl border-2 border-primary/10 bg-card shadow-2xl shadow-primary/5"
         data-step={step}
       >
         {/* Header */}
@@ -75,22 +81,28 @@ const AnimatedLandingPage = () => {
 
         {/* Content */}
         <div className="w-full flex-1 p-4">
+          <div className="mb-4 h-6 text-center text-sm font-medium text-muted-foreground transition-opacity duration-500">
+             {step > 0 && <p className="animate-fade-in-down">{stepMessages[step]}</p>}
+          </div>
           <div className="relative flex flex-col space-y-2">
             {tasks.map((task) => (
               <div
                 key={task.id}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-all duration-1000 ease-in-out',
-                  step >= 3 ? 'order-[var(--final-order)]' : 'order-[var(--initial-order)]',
+                  'flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-all duration-1000 ease-out',
+                   step >= 3 ? 'order-[var(--final-order)]' : 'order-[var(--initial-order)]',
+                   step > 0 ? 'opacity-100' : 'opacity-0',
+                   'animate-fade-in'
                 )}
                 style={{
                     '--initial-order': task.initialOrder,
                     '--final-order': task.finalOrder,
+                    animationDelay: `${(task.initialOrder * 100)}ms`
                 } as React.CSSProperties}
               >
                 <div className={cn(
                     'h-5 w-5 flex-shrink-0 rounded-sm border-2 border-muted transition-all duration-500',
-                    step === 4 && 'animate-check-fill-delayed'
+                     step === 4 && 'animate-check-fill'
                 )}>
                 </div>
                 <span className="flex-1 text-sm font-medium text-card-foreground">
@@ -106,7 +118,7 @@ const AnimatedLandingPage = () => {
 
         {/* Footer */}
         <div className="w-full border-t p-3 text-center">
-            <div className={cn("transition-all duration-500", (isVisible(2)) ? 'opacity-100' : 'opacity-0')}>
+            <div className={cn("transition-all duration-500", (step >= 2) ? 'opacity-100' : 'opacity-0')}>
                 {step < 3 ? (
                     <Button variant="outline" size="sm" className={cn(step === 2 && 'animate-glow-shadow-sm')}>
                         Prioritize with AI

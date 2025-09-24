@@ -93,6 +93,16 @@ export default {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        'fade-in-down': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(-10px)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
         'fade-in-up': {
             '0%': {
                 opacity: '0',
@@ -107,7 +117,7 @@ export default {
           '0%': { width: '0' },
           '100%': { width: '100%' },
         },
-        'check-fill-delayed': {
+        'check-fill': {
             '0%, 50%': { 'background-color': 'transparent' },
             '100%': { 'background-color': 'hsl(var(--primary))', 'border-color': 'hsl(var(--primary))' },
         },
@@ -120,9 +130,10 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.5s ease-in-out forwards',
+        'fade-in-down': 'fade-in-down 0.5s ease-out forwards',
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
         'typing': 'typing 1.5s steps(30, end) forwards',
-        'check-fill-delayed': 'check-fill-delayed 0.4s ease-in-out forwards 1s',
+        'check-fill': 'check-fill 0.4s ease-in-out forwards 1s',
         'glow-shadow-sm': 'glow-shadow-sm 1.5s ease-in-out infinite',
       },
     },
