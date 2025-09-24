@@ -116,10 +116,10 @@ export default function AppSidebar() {
                       size="sm"
                       tooltip={{ children: folder.name, side: 'right' }}
                     >
-                      <a>
+                      <>
                         <FolderIcon />
                         <span>{folder.name}</span>
-                      </a>
+                      </>
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
