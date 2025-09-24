@@ -11,6 +11,11 @@ export async function runTaskPrioritization(tasks: AiTask[]) {
     if (!prioritizedTasks) {
         throw new Error('AI prioritization returned no tasks.');
     }
+    // Verify that all tasks returned by the AI have an ID
+    const tasksMissingIds = prioritizedTasks.filter(task => !task.id);
+    if (tasksMissingIds.length > 0) {
+      throw new Error(`AI returned ${tasksMissingIds.length} tasks without an ID.`);
+    }
     return prioritizedTasks;
   } catch (error) {
     console.error('Error prioritizing tasks:', error);

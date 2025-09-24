@@ -252,7 +252,13 @@ export default function AppHeader() {
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: `Failed to prioritize tasks: ${errorMessage}`,
+          description: (
+            <div className="mt-2 rounded-md bg-destructive-foreground/10 p-2">
+                <code className="text-xs text-destructive-foreground">
+                    {errorMessage}
+                </code>
+            </div>
+          )
         });
       }
     });
