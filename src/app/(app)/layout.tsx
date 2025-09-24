@@ -26,6 +26,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Redirect to /folders if user is logged in and at the root
+  if (pathname === '/') {
+    router.push('/folders');
+    return (
+        <div className="flex h-screen w-full items-center justify-center bg-background">
+            <div className="h-16 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
+        </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />

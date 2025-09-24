@@ -41,7 +41,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/');
+      router.push('/folders');
     }
   }, [user, loading, router]);
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router.push('/');
+      router.push('/folders');
     } catch (error) {
       console.error('Error signing in with Google: ', error);
     }

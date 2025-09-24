@@ -117,7 +117,7 @@ export default function AppSidebar() {
                       tooltip={{ children: folder.name, side: 'right' }}
                     >
                       <div className="flex w-full items-center gap-2">
-                        <FolderIcon />
+                        <FolderIcon className="h-4 w-4" />
                         <span>{folder.name}</span>
                       </div>
                     </SidebarMenuButton>

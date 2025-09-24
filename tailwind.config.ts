@@ -89,10 +89,15 @@ export default {
             height: '0',
           },
         },
+        'bob': {
+          '0%, 100%': { transform: 'translateY(-2%)' },
+          '50%': { transform: 'translateY(2%)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'bob': 'bob 2s ease-in-out infinite',
       },
     },
   },

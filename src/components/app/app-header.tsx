@@ -24,6 +24,7 @@ import { importTasksFromImage } from '@/app/actions/ocr';
 import { usePathname } from 'next/navigation';
 import { Input } from '../ui/input';
 import { transcribeAudio } from '@/ai/flows/transcribe-audio';
+import { cn } from '@/lib/utils';
 
 function ImportTasksSheet({ children }: { children: React.ReactNode }) {
     const [isOpen, setIsOpen] = React.useState(false);
@@ -251,10 +252,10 @@ export default function AppHeader() {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         toast({
           variant: 'destructive',
-          title: 'Error',
+          title: 'Error Prioritizing Tasks',
           description: (
-            <div className="mt-2 rounded-md bg-destructive-foreground/10 p-2">
-                <code className="text-xs text-destructive-foreground">
+            <div className="mt-2 w-full overflow-auto rounded-md bg-destructive-foreground/10 p-2">
+                <code className="text-xs text-destructive-foreground whitespace-pre-wrap">
                     {errorMessage}
                 </code>
             </div>
@@ -265,7 +266,7 @@ export default function AppHeader() {
   };
 
   return (
-    <header className="flex h-14 items-center justify-between gap-4 border-b bg-background px-4 lg:px-6">
+    <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b bg-background px-4 lg:px-6">
       <SidebarTrigger className="md:hidden" />
       <div className="flex-1" />
       <div className="flex items-center gap-2">
@@ -275,7 +276,7 @@ export default function AppHeader() {
           onClick={handlePrioritize}
           disabled={isPrioritizing}
         >
-          <Bolt className="mr-2 h-4 w-4 animate-pulse" />
+          <Bolt className={cn("mr-2 h-4 w-4", isPrioritizing && "animate-[spin_2s_linear_infinite]")} />
           {isPrioritizing ? 'Prioritizing...' : 'Prioritize'}
         </Button>
 
