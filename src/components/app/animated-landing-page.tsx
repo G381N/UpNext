@@ -59,7 +59,7 @@ const AnimatedLandingPage = () => {
     "", // Step 0 (Logo)
     "", // Step 1 (Logo)
     "Here is your to-do list for the day.", // Step 2
-    <span key="step3-message">Let the AI figure out what's <span className="animate-glow font-medium text-foreground">next up</span>...</span>, // Step 3
+    <span key="step3-message">Let the AI figure out what's <span className="animate-glow font-medium text-foreground">NextUp</span>...</span>, // Step 3
     "Prioritizing based on impact and effort...", // Step 4
     "Your prioritized list is ready!", // Step 5
   ];
@@ -89,7 +89,7 @@ const AnimatedLandingPage = () => {
           </div>
           <div className="flex-1 px-4">
             <div className="w-full rounded-md bg-secondary px-2 py-1 text-center text-sm text-muted-foreground">
-              nextup.app
+              nextup.gebin.net
             </div>
           </div>
           <div className="w-12" />
