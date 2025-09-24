@@ -21,6 +21,19 @@ import { useToast } from '@/hooks/use-toast';
 import type { Folder } from '@/types';
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { deleteFolder } from '@/app/actions/folders';
+import { useRouter } from 'next/navigation';
 
 const folderSchema = z.object({
   name: z.string().min(1, 'Folder name is required.'),
@@ -37,7 +50,9 @@ interface FolderFormProps {
 
 export function FolderForm({ userId, folder, onSuccess }: FolderFormProps) {
   const [isPending, startTransition] = useTransition();
+  const [isDeleting, startDeleteTransition] = useTransition();
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<FolderFormValues>({
     resolver: zodResolver(folderSchema),
@@ -82,44 +97,87 @@ export function FolderForm({ userId, folder, onSuccess }: FolderFormProps) {
     });
   };
 
+  const handleDelete = () => {
+    if (!folder || !userId) return;
+    startDeleteTransition(async () => {
+        const result = await deleteFolder(folder.id, userId);
+        if (result.success) {
+            toast({ title: 'Folder deleted', description: `The "${folder.name}" folder has been removed.` });
+            router.push('/folders');
+            onSuccess?.();
+        } else {
+            toast({ variant: 'destructive', title: 'Error deleting folder', description: result.error });
+        }
+    });
+  };
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-6">
-        <div className="flex items-center gap-4">
-          <FormField
-            control={form.control}
-            name="icon"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <IconPicker value={field.value} onChange={field.onChange} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel className="sr-only">Folder Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Folder Name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-6">
+          <div className="flex items-center gap-4">
+            <FormField
+              control={form.control}
+              name="icon"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <IconPicker value={field.value} onChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel className="sr-only">Folder Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Folder Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <Button type="submit" disabled={isPending} className="w-full">
+            {isPending
+              ? 'Saving...'
+              : folder
+              ? 'Save Changes'
+              : 'Create Folder'}
+          </Button>
+        </form>
+      </Form>
+      {folder && (
+        <div className="mt-8 border-t pt-6">
+          <h3 className="text-lg font-medium text-destructive">Danger Zone</h3>
+          <p className="text-sm text-muted-foreground mt-1 mb-4">
+            Deleting a folder will also permanently delete all tasks within it. This action cannot be undone.
+          </p>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full">Delete Folder</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This will permanently delete the <strong>{folder.name}</strong> folder and all tasks inside it. This action cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                        {isDeleting ? 'Deleting...' : 'Yes, delete folder'}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
-        <Button type="submit" disabled={isPending} className="w-full">
-          {isPending
-            ? 'Saving...'
-            : folder
-            ? 'Save Changes'
-            : 'Create Folder'}
-        </Button>
-      </form>
-    </Form>
+      )}
+    </>
   );
 }

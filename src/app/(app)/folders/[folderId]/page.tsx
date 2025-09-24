@@ -4,11 +4,11 @@ import { getDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import type { Folder } from '@/types';
 import TaskList from '@/components/app/task-list';
-import { notFound, useParams } from 'next/navigation';
+import { notFound, useParams, useRouter } from 'next/navigation';
 import { getIcon } from '@/lib/icons';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { FolderCog } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { FolderForm } from '@/components/app/folder-form';
 import { useAuth } from '@/hooks/use-auth';
 import React, { useEffect, useState } from 'react';
@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function FolderPage() {
   const { user } = useAuth();
   const params = useParams();
+  const router = useRouter();
   const folderId = params.folderId as string;
   const [folder, setFolder] = useState<Folder | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +38,11 @@ export default function FolderPage() {
         setLoading(false);
       };
       fetchFolder();
+    } else if (!user) {
+        // if user logs out, redirect
+        router.push('/login');
     }
-  }, [user, folderId]);
+  }, [user, folderId, router]);
 
   if (loading || !folder) {
     return (
@@ -68,7 +72,7 @@ export default function FolderPage() {
         <Sheet open={isSettingsSheetOpen} onOpenChange={setIsSettingsSheetOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="sm">
-              <FolderCog className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 h-4 w-4" />
               Settings
             </Button>
           </SheetTrigger>

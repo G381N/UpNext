@@ -115,7 +115,7 @@ export default function AppHeader() {
           onClick={handlePrioritize}
           disabled={isPrioritizing}
         >
-          <Bolt className="mr-2 h-4 w-4" />
+          <Bolt className="mr-2 h-4 w-4 animate-pulse" />
           {isPrioritizing ? 'Prioritizing...' : 'Prioritize'}
         </Button>
 
