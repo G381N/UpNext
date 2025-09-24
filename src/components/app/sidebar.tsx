@@ -71,6 +71,7 @@ function SidebarLogo() {
 export default function AppSidebar() {
   const { user } = useAuth();
   const pathname = usePathname();
+  const { state } = useSidebar();
 
   const [folders, loading, error] = useCollection(
     user ? query(collection(db, 'users', user.uid, 'folders'), where('userId', '==', user.uid)) : null
@@ -99,7 +100,7 @@ export default function AppSidebar() {
                 <SheetTrigger asChild>
                   <Button variant="ghost" className="w-full justify-start">
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    New Task
+                    {state === 'expanded' && <span>New Task</span>}
                   </Button>
                 </SheetTrigger>
                 <SheetContent>
@@ -119,7 +120,7 @@ export default function AppSidebar() {
                 <SheetTrigger asChild>
                   <Button variant="ghost" className="w-full justify-start">
                     <FolderPlus className="mr-2 h-4 w-4" />
-                    New Folder
+                     {state === 'expanded' && <span>New Folder</span>}
                   </Button>
                 </SheetTrigger>
                 <SheetContent>
