@@ -61,7 +61,7 @@ const AnimatedLandingPage = () => {
   ];
 
   return (
-    <div className="relative mx-auto w-full max-w-4xl px-4">
+    <div className="relative mx-auto w-full max-w-4xl px-4 animate-fade-in-up" style={{animationDelay: '300ms'}}>
       <div
         className="relative mx-auto flex min-h-[450px] w-full max-w-2xl flex-col items-center justify-start rounded-xl border-2 border-primary/10 bg-card shadow-2xl shadow-primary/5"
         data-step={step}
@@ -89,10 +89,10 @@ const AnimatedLandingPage = () => {
               <div
                 key={task.id}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-all duration-1000 ease-out',
+                  'flex items-center gap-3 rounded-lg border bg-card p-3 shadow-sm transition-all duration-1000 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)]',
                    step >= 3 ? 'order-[var(--final-order)]' : 'order-[var(--initial-order)]',
                    step > 0 ? 'opacity-100' : 'opacity-0',
-                   'animate-fade-in'
+                   'animate-spring-in'
                 )}
                 style={{
                     '--initial-order': task.initialOrder,
