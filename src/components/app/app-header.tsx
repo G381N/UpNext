@@ -17,7 +17,7 @@ import {
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 import { TaskForm } from './task-form';
 import { useCollection } from 'react-firebase-hooks/firestore';
-import { collection, query, where, writeBatch, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, writeBatch, doc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import type { Folder } from '@/types';
 import { importTasksFromImage } from '@/app/actions/ocr';
