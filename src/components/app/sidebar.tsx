@@ -14,6 +14,7 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenuAction,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   FolderPlus,
@@ -32,6 +33,7 @@ import { FolderForm } from './folder-form';
 import { TaskForm } from './task-form';
 import { Button } from '../ui/button';
 import { getIcon } from '@/lib/icons';
+import { cn } from '@/lib/utils';
 
 function FolderSettingsSheet({ folder, children }: { folder: Folder, children: React.ReactNode }) {
     const { user } = useAuth();
@@ -49,6 +51,21 @@ function FolderSettingsSheet({ folder, children }: { folder: Folder, children: R
         </Sheet>
     )
 }
+
+function SidebarLogo() {
+    const { toggleSidebar } = useSidebar();
+    return (
+      <button
+        onClick={() => toggleSidebar()}
+        className={cn(
+          'flex w-full items-center gap-2 text-lg font-bold tracking-tight text-foreground'
+        )}
+      >
+        <Logo />
+      </button>
+    );
+}
+
 
 export default function AppSidebar() {
   const { user } = useAuth();
@@ -70,7 +87,7 @@ export default function AppSidebar() {
       className="border-r"
     >
       <SidebarHeader>
-        <Logo />
+        <SidebarLogo />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -114,7 +131,7 @@ export default function AppSidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup className="flex-1 overflow-auto">
+        <SidebarGroup className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <SidebarGroupLabel>Folders</SidebarGroupLabel>
           <SidebarMenu>
             {loading && (
