@@ -26,6 +26,7 @@ export default function FolderPage() {
 
   useEffect(() => {
     if (user && folderId) {
+      localStorage.setItem('lastUsedFolderId', folderId);
       const fetchFolder = async () => {
         setLoading(true);
         const folderRef = doc(db, 'users', user.uid, 'folders', folderId);
@@ -33,6 +34,7 @@ export default function FolderPage() {
         if (folderSnap.exists()) {
           setFolder({ id: folderSnap.id, ...folderSnap.data() } as Folder);
         } else {
+          localStorage.removeItem('lastUsedFolderId');
           notFound();
         }
         setLoading(false);
