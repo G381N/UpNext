@@ -48,7 +48,7 @@ export default function LandingPage() {
 
         <AnimatedLandingPage />
 
-        <section id="features" className="bg-secondary py-16 md:py-24 lg:py-32">
+        <section id="features" className="py-16 md:py-24 lg:py-32">
           <div className="container mx-auto px-4">
             <div className="mx-auto mb-12 max-w-3xl text-center">
               <h2 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
