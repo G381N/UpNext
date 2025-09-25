@@ -4,7 +4,7 @@ import React from 'react';
 import { useTransition } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Calendar } from 'lucide-react';
 import type { Task, Folder } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
@@ -14,6 +14,7 @@ import { useCollection } from 'react-firebase-hooks/firestore';
 import { collection, query, where, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 interface TaskItemProps {
   task: Task;
@@ -65,7 +66,7 @@ export default function TaskItem({ task }: TaskItemProps) {
   return (
     <div
       className={cn(
-        'group flex items-center gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50',
+        'group flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50',
         task.completed && 'bg-muted/30'
       )}
     >
@@ -74,17 +75,25 @@ export default function TaskItem({ task }: TaskItemProps) {
         checked={task.completed}
         onCheckedChange={handleToggle}
         disabled={isPending}
-        className="h-5 w-5"
+        className="h-5 w-5 mt-0.5"
       />
-      <label
-        htmlFor={`task-${task.id}`}
-        className={cn(
-          'flex-1 cursor-pointer text-sm font-medium',
-          task.completed && 'text-muted-foreground line-through'
+      <div className="flex-1">
+        <label
+          htmlFor={`task-${task.id}`}
+          className={cn(
+            'cursor-pointer text-sm font-medium',
+            task.completed && 'text-muted-foreground line-through'
+          )}
+        >
+          {task.title}
+        </label>
+        {task.deadline && (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>{format(task.deadline.toDate(), 'PP')}</span>
+          </div>
         )}
-      >
-        {task.title}
-      </label>
+      </div>
       <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
           <SheetTrigger asChild>

@@ -15,7 +15,7 @@ import {z} from 'genkit';
 const TaskSchema = z.object({
   id: z.string(),
   title: z.string(),
-  description: z.string().optional(),
+  deadline: z.string().optional(),
   folderId: z.string().optional(),
   order: z.number().optional(),
 });
@@ -36,17 +36,20 @@ const prioritizeTasksPrompt = ai.definePrompt({
   name: 'prioritizeTasksPrompt',
   input: {schema: AutoPrioritizeTasksInputSchema},
   output: {schema: AutoPrioritizeTasksOutputSchema},
-  prompt: `You are an AI assistant that specializes in smart task prioritization. Your goal is to create a productive task order that helps users build momentum.
+  prompt: `You are an AI assistant that specializes in smart task prioritization. Your goal is to create a productive task order that helps users build momentum and get things done in the shortest time possible.
 
 Analyze the following list of tasks. Your prioritization strategy is as follows:
 
-1.  First, identify any tasks that are very small and can be completed quickly (e.g., "reply to an email", "make a quick call"). These should be placed at the very top of the list to get them out of the way.
-2.  Next, identify the most important and high-priority tasks (e.g., tasks with deadlines, critical project work like "Integrate a new API for an event"). These should come right after the quick wins.
-3.  Finally, order the remaining tasks based on a logical flow.
+1.  **Quick Wins First**: Identify any tasks that are very small and can be completed quickly (e.g., "reply to an email," "make a quick call," "throw out the trash"). These should be placed at the very top of the list to get them out of the way and build momentum.
+2.  **Urgent Deadlines**: After the quick wins, identify tasks with the most urgent deadlines. Order them by which is due soonest. If a task's deadline is extremely close (e.g., within the next few hours), it might need to be prioritized even before some quick wins, but use your judgment.
+3.  **Logical Flow & Importance**: For the remaining tasks, order them based on a logical workflow and perceived importance. If a task seems like a blocker for others, it should come first. Avoid "starvation" where smaller but important tasks are perpetually pushed down by larger ones.
+4.  **Balance is Key**: The final list should feel balanced, allowing the user to switch between quick, easy tasks and more involved, important ones, preventing burnout and maintaining productivity. The main goal is to clear the entire list as efficiently as possible.
+
+Current time for reference: ${new Date().toISOString()}
 
 Here is the list of tasks:
 {{#each this}}
-- ID: {{id}}, Title: {{title}}, Description: {{description}}
+- ID: {{id}}, Title: {{title}}, Deadline: {{#if deadline}}{{deadline}}{{else}}None{{/if}}
 {{/each}}
 
 Return the full, reordered list of tasks. You MUST return all original fields for each task, especially the 'id'. Do not add, remove, or modify any tasks; only change their order.`,
@@ -59,6 +62,9 @@ const autoPrioritizeTasksFlow = ai.defineFlow(
     outputSchema: AutoPrioritizeTasksOutputSchema,
   },
   async (input) => {
+    if (!input || input.length === 0) {
+      return [];
+    }
     const {output} = await prioritizeTasksPrompt(input);
     return output!;
   }

@@ -52,7 +52,6 @@ function ImportTasksSheet({ children }: { children: React.ReactNode }) {
                         const newDocRef = doc(tasksRef);
                         batch.set(newDocRef, {
                             title: title.trim(),
-                            description: 'Imported from image',
                             completed: false,
                             folderId: currentFolderId,
                             userId: user!.uid,
@@ -155,7 +154,6 @@ function ImportFromVoiceSheet({ children }: { children: React.ReactNode }) {
                     const newDocRef = doc(tasksRef);
                     batch.set(newDocRef, {
                         title: title.trim(),
-                        description: 'Imported from voice',
                         completed: false,
                         folderId: currentFolderId,
                         userId: user!.uid,
@@ -226,11 +224,11 @@ export default function AppHeader() {
       const userTasksSnapshot = await getDocs(query(collection(db, 'users', user.uid, 'tasks'), where('completed', '==', false)));
       
       const userTasks = userTasksSnapshot.docs.map(doc => {
-        const data = doc.data() as Task;
+        const data = doc.data() as Omit<Task, 'id'>;
         return { 
             id: doc.id,
             title: data.title,
-            description: data.description || ''
+            deadline: data.deadline?.toDate().toISOString() || undefined,
         };
       });
 

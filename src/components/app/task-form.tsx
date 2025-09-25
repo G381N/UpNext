@@ -14,7 +14,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import type { Task, Folder } from '@/types';
@@ -26,12 +25,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { usePathname } from 'next/navigation';
-import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { Calendar } from '../ui/calendar';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Task title is required.'),
-  description: z.string().optional(),
+  deadline: z.date().optional(),
   folderId: z.string().min(1, 'Please select a folder.'),
 });
 
@@ -54,7 +58,7 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: task?.title || '',
-      description: task?.description || '',
+      deadline: task?.deadline ? task.deadline.toDate() : undefined,
       folderId: task?.folderId || currentFolderId || folders[0]?.id || '',
     },
   });
@@ -70,13 +74,19 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
     }
     startTransition(async () => {
       try {
+        const data: any = {
+          title: values.title,
+          folderId: values.folderId,
+          deadline: values.deadline ? Timestamp.fromDate(values.deadline) : null,
+        };
+
         if (task) {
           const taskRef = doc(db, 'users', userId, 'tasks', task.id);
-          await updateDoc(taskRef, values);
+          await updateDoc(taskRef, data);
           toast({ title: 'Success', description: 'Task updated successfully.' });
         } else {
           await addDoc(collection(db, 'users', userId, 'tasks'), {
-            ...values,
+            ...data,
             userId,
             completed: false,
             order: Date.now(),
@@ -122,16 +132,41 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
         />
         <FormField
           control={form.control}
-          name="description"
+          name="deadline"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description (Optional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Add more details about the task..."
-                  {...field}
-                />
-              </FormControl>
+            <FormItem className="flex flex-col">
+              <FormLabel>Deadline (Optional)</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date(new Date().setHours(0, 0, 0, 0))
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}
