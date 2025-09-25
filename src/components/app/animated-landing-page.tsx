@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
-import { Logo } from './logo';
+import { PublicLogo } from './logo';
 
 const AnimatedLandingPage = () => {
   const [step, setStep] = useState(0);
@@ -76,7 +76,7 @@ const AnimatedLandingPage = () => {
             "absolute inset-0 flex items-center justify-center bg-card transition-opacity duration-500",
             showTasks ? 'opacity-0 z-0' : 'opacity-100 z-10'
         )}>
-            <Logo iconClassName="h-10 w-10" className="text-4xl animate-spring-in" />
+            <PublicLogo iconClassName="h-10 w-10" className="text-4xl animate-spring-in" />
         </div>
 
         {/* Header */}

@@ -6,11 +6,11 @@ import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/app/logo';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ThemeSwitch } from '@/components/app/theme-switch';
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, CheckCircle } from 'lucide-react';
+import { PublicLogo } from '@/components/app/logo';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -49,8 +49,15 @@ export default function LoginPage() {
     );
   }
 
+  const features = [
+    'Smart Prioritization with AI',
+    'Add tasks via text, voice, or image',
+    'Organize tasks into folders',
+    'Clean, minimalist interface',
+  ];
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-secondary p-4">
         <div className="absolute top-4 left-4">
             <Button variant="outline" size="icon" asChild>
                 <Link href="/">
@@ -62,21 +69,31 @@ export default function LoginPage() {
         <div className="absolute top-4 right-4">
             <ThemeSwitch />
         </div>
-      <Card className="w-full max-w-sm shadow-xl">
-        <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex items-center justify-center gap-1">
-                <Logo iconClassName="h-10 w-10" className="gap-0" />
-            </div>
-            <CardTitle className="font-headline text-3xl tracking-tight">Welcome to NextUp</CardTitle>
-            <CardDescription>The smartest way to organize your tasks.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={handleSignIn} size="lg" className="w-full">
-            <GoogleIcon className="mr-2 h-5 w-5" />
-            Sign In with Google
-          </Button>
-        </CardContent>
-      </Card>
+        <Card className="w-full max-w-md shadow-2xl">
+            <CardHeader className="text-center">
+                <div className="mx-auto mb-4">
+                    <PublicLogo iconClassName="h-12 w-12" />
+                </div>
+                <CardTitle className="font-headline text-3xl tracking-tight">Welcome to NextUp</CardTitle>
+                <CardDescription>Sign in to the smartest way to organize your tasks.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                    {features.map((feature, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                            <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                            <span>{feature}</span>
+                        </li>
+                    ))}
+                </ul>
+            </CardContent>
+            <CardFooter>
+                <Button onClick={handleSignIn} size="lg" className="w-full">
+                    <GoogleIcon className="mr-2 h-5 w-5" />
+                    Continue with Google
+                </Button>
+            </CardFooter>
+        </Card>
     </main>
   );
 }
