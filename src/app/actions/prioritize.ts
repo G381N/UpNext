@@ -11,6 +11,11 @@ export async function runTaskPrioritization(tasks: AiTask[]) {
     if (!prioritizedTasks) {
         throw new Error('AI prioritization returned no tasks.');
     }
+
+    if (prioritizedTasks.length !== tasks.length) {
+        throw new Error(`AI returned a different number of tasks (${prioritizedTasks.length}) than it was given (${tasks.length}).`);
+    }
+
     // Verify that all tasks returned by the AI have an ID
     const tasksMissingIds = prioritizedTasks.filter(task => !task.id);
     if (tasksMissingIds.length > 0) {
@@ -20,9 +25,7 @@ export async function runTaskPrioritization(tasks: AiTask[]) {
     // Verify that all original task IDs are present in the AI's response
     const originalTaskIds = new Set(tasks.map(t => t.id));
     const returnedTaskIds = new Set(prioritizedTasks.map(t => t.id));
-    if (originalTaskIds.size !== returnedTaskIds.size) {
-        throw new Error('AI returned a different number of tasks than it was given.');
-    }
+    
     for (const id of originalTaskIds) {
         if (!returnedTaskIds.has(id)) {
             throw new Error(`AI response is missing original task ID: ${id}`);
