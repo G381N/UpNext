@@ -15,6 +15,8 @@ import { collection, query, where, doc, updateDoc, deleteDoc } from 'firebase/fi
 import { db } from '@/lib/firebase/config';
 import { cn } from '@/lib/utils';
 import { format, isToday } from 'date-fns';
+import { deleteTask, undoTask } from '@/app/actions/tasks';
+import { ToastAction } from '../ui/toast';
 
 interface TaskItemProps {
   task: Task;
@@ -50,19 +52,43 @@ export default function TaskItem({ task }: TaskItemProps) {
   const handleDelete = () => {
     if (!user) return;
     startTransition(async () => {
-      try {
-        const taskRef = doc(db, 'users', user.uid, 'tasks', task.id);
-        await deleteDoc(taskRef);
-        toast({ title: 'Task deleted' });
-      } catch (e) {
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to delete task.',
-        });
-      }
+        try {
+            await deleteTask(task.id, user.uid);
+            toast({
+                title: "Task deleted",
+                description: "The task has been successfully deleted.",
+                action: (
+                    <ToastAction altText="Undo" onClick={() => handleUndo(task)}>
+                        Undo
+                    </ToastAction>
+                ),
+            });
+        } catch (e) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to delete task.',
+            });
+        }
     });
-  };
+};
+
+const handleUndo = async (taskToRestore: Task) => {
+    if (!user) return;
+    try {
+        await undoTask(taskToRestore, user.uid);
+        toast({
+            title: 'Task restored',
+            description: 'The task has been successfully restored.',
+        });
+    } catch (e) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Failed to restore task.',
+        });
+    }
+};
 
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Prevent card click from toggling checkbox
