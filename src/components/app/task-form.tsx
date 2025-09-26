@@ -53,6 +53,7 @@ function DateTimePicker({ field }: { field: any }) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(field.value);
     const [view, setView] = React.useState<'date' | 'time'>('date');
+    const dialogContentRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         setDate(field.value);
@@ -120,7 +121,7 @@ function DateTimePicker({ field }: { field: any }) {
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="w-auto sm:max-w-md">
+            <DialogContent ref={dialogContentRef} className="w-auto sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>
                       {view === 'date' ? 'Select Deadline Date' : 'Select Deadline Time'}
@@ -152,7 +153,7 @@ function DateTimePicker({ field }: { field: any }) {
                             <SelectTrigger className="w-[80px]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent position="popper" className="max-h-56">
+                            <SelectContent position="popper" className="max-h-56" container={dialogContentRef.current}>
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(hour => (
                                     <SelectItem key={hour} value={String(hour)}>{String(hour).padStart(2, '0')}</SelectItem>
                                 ))}
@@ -166,7 +167,7 @@ function DateTimePicker({ field }: { field: any }) {
                             <SelectTrigger className="w-[80px]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent position="popper" className="max-h-56">
+                            <SelectContent position="popper" className="max-h-56" container={dialogContentRef.current}>
                                 {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(minute => (
                                     <SelectItem key={minute} value={minute}>{minute}</SelectItem>
                                 ))}
@@ -179,7 +180,7 @@ function DateTimePicker({ field }: { field: any }) {
                             <SelectTrigger className="w-[80px]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent position="popper">
+                            <SelectContent position="popper" container={dialogContentRef.current}>
                                 <SelectItem value="am">AM</SelectItem>
                                 <SelectItem value="pm">PM</SelectItem>
                             </SelectContent>
