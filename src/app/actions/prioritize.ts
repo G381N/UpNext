@@ -27,13 +27,13 @@ export async function runTaskPrioritization(tasks: ClientTask[]) {
     }
 
     if (prioritizedTasks.length !== tasks.length) {
-        throw new Error(`AI returned a different number of tasks (${prioritizedTasks.length}) than it was given (${tasks.length}).`);
+        throw new Error(`An unexpected response was received from the server. The AI returned a different number of tasks (${prioritizedTasks.length}) than it was given (${tasks.length}).`);
     }
 
     // Verify that all tasks returned by the AI have an ID
     const tasksMissingIds = prioritizedTasks.filter(task => !task.id);
     if (tasksMissingIds.length > 0) {
-      throw new Error(`AI returned ${tasksMissingIds.length} tasks without an ID.`);
+      throw new Error(`An unexpected response was received from the server. The AI returned ${tasksMissingIds.length} tasks without an ID.`);
     }
 
     // Verify that all original task IDs are present in the AI's response
@@ -42,7 +42,7 @@ export async function runTaskPrioritization(tasks: ClientTask[]) {
     
     for (const id of originalTaskIds) {
         if (!returnedTaskIds.has(id)) {
-            throw new Error(`AI response is missing original task ID: ${id}`);
+            throw new Error(`An unexpected response was received from the server. The AI response is missing original task ID: ${id}`);
         }
     }
     

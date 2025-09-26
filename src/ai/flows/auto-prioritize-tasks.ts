@@ -17,8 +17,6 @@ const TaskSchema = z.object({
   title: z.string(),
   deadline: z.string().optional(),
   priority: z.enum(['High', 'Medium', 'Low']).optional(),
-  folderId: z.string().optional(),
-  order: z.number().optional(),
 });
 
 export type Task = z.infer<typeof TaskSchema>;
