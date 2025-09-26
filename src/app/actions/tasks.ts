@@ -1,27 +1,9 @@
 'use server';
 
 import { db } from '@/lib/firebase/config';
-import { doc, deleteDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import type { Task } from '@/types';
-
-export async function deleteTask(taskId: string, userId: string) {
-    try {
-        if (!userId) {
-            throw new Error('User not authenticated');
-        }
-        
-        const taskRef = doc(db, 'users', userId, 'tasks', taskId);
-        await deleteDoc(taskRef);
-
-        revalidatePath('/', 'layout');
-        return { success: true };
-    } catch (error) {
-        const message = error instanceof Error ? error.message : "An unknown error occurred.";
-        console.error("Error deleting task:", message);
-        return { success: false, error: message };
-    }
-}
 
 export async function undoTask(task: Task, userId: string) {
     try {

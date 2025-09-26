@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { usePathname } from 'next/navigation';
-import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { CalendarIcon, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -33,7 +33,6 @@ import { format, set, getHours, getMinutes } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
-import { deleteTask } from '@/app/actions/tasks';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Task title is required.'),
@@ -97,12 +96,8 @@ function DateTimePicker({ field }: { field: any }) {
         setIsOpen(false);
     };
 
-    const formatTime = (date: Date) => {
-        return format(date, "h:mm a");
-    };
-
-    const currentHour = date ? getHours(date) : 0;
-    const currentMinute = date ? getMinutes(date) : 0;
+    const currentHour = date ? getHours(date) : new Date().getHours();
+    const currentMinute = date ? getMinutes(date) : new Date().getMinutes();
     const currentPeriod = currentHour >= 12 ? 'pm' : 'am';
     let displayHour = currentHour % 12;
     if (displayHour === 0) displayHour = 12; // Noon/midnight case
@@ -193,7 +188,7 @@ function DateTimePicker({ field }: { field: any }) {
                   </div>
                 )}
                 
-                <DialogFooter className="justify-between">
+                <DialogFooter className="justify-between sm:justify-between">
                     {view === 'time' ? (
                         <Button variant="ghost" onClick={() => setView('date')}>
                             <ChevronLeft className="mr-2 h-4 w-4" /> Back
@@ -270,12 +265,14 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
     if (!task || !userId) return;
 
     startDeleteTransition(async () => {
-      const result = await deleteTask(task.id, userId);
-      if (result.success) {
+      try {
+        const taskRef = doc(db, 'users', userId, 'tasks', task.id);
+        await deleteDoc(taskRef);
         toast({ title: 'Task deleted', description: `The task "${task.title}" has been removed.` });
         onSuccess?.();
-      } else {
-        toast({ variant: 'destructive', title: 'Error deleting task', description: result.error });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'An unknown error occurred';
+        toast({ variant: 'destructive', title: 'Error deleting task', description: message });
       }
     });
   };
@@ -345,7 +342,7 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col-reverse sm:flex-col gap-2">
             <Button type="submit" disabled={isPending} className="w-full">
               {isPending ? 'Saving...' : task ? 'Save Changes' : 'Create Task'}
             </Button>
