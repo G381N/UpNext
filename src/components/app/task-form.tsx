@@ -32,6 +32,9 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, set } from 'date-fns';
 import { Calendar } from '../ui/calendar';
+import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Task title is required.'),
@@ -47,6 +50,116 @@ interface TaskFormProps {
   task?: Task;
   onSuccess?: () => void;
 }
+
+function DateTimePicker({ field }: { field: any }) {
+  const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleSelect = (date: Date | undefined) => {
+    if (!date) {
+      field.onChange(undefined);
+      return;
+    }
+    const now = new Date();
+    const newDate = new Date(date);
+    // Preserve existing time if a date is already set, otherwise use current time
+    const hours = field.value ? field.value.getHours() : now.getHours();
+    const minutes = field.value ? field.value.getMinutes() : now.getMinutes();
+    newDate.setHours(hours, minutes);
+    field.onChange(newDate);
+
+    if (isMobile) {
+        // Keep dialog open on mobile to allow time selection
+    } else {
+        // Debounce closing to allow time input interaction
+        setTimeout(() => setIsOpen(false), 100);
+    }
+  }
+
+  const PickerContent = () => (
+    <>
+      <Calendar
+        mode="single"
+        selected={field.value}
+        onSelect={handleSelect}
+        disabled={(date) =>
+          date < new Date(new Date().setHours(0, 0, 0, 0))
+        }
+        initialFocus
+      />
+      {field.value && (
+        <div className="p-3 border-t border-border">
+            <p className="text-sm text-muted-foreground mb-2">Deadline Time</p>
+            <Input
+                type="time"
+                value={format(field.value, "HH:mm")}
+                onChange={(e) => {
+                    const [hours, minutes] = e.target.value.split(':').map(Number);
+                    const newDate = set(field.value!, { hours, minutes });
+                    field.onChange(newDate);
+                }}
+            />
+        </div>
+      )}
+      {isMobile && (
+        <div className="p-3 border-t">
+            <Button className="w-full" onClick={() => setIsOpen(false)}>Done</Button>
+        </div>
+      )}
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button
+            variant={"outline"}
+            className={cn(
+              "w-full justify-start pl-3 text-left font-normal",
+              !field.value && "text-muted-foreground"
+            )}
+          >
+            {field.value ? (
+              format(field.value, "PPP, p")
+            ) : (
+              <span>Pick a date and time</span>
+            )}
+            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="w-auto p-0">
+          <PickerContent />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant={"outline"}
+          className={cn(
+            "w-full justify-start pl-3 text-left font-normal",
+            !field.value && "text-muted-foreground"
+          )}
+        >
+          {field.value ? (
+            format(field.value, "PPP, p")
+          ) : (
+            <span>Pick a date and time</span>
+          )}
+          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <PickerContent />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 
 export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
   const [isPending, startTransition] = useTransition();
@@ -137,63 +250,9 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Deadline (Optional)</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP, p")
-                      ) : (
-                        <span>Pick a date and time</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={(date) => {
-                      if (!date) {
-                        field.onChange(undefined);
-                        return;
-                      }
-                      const now = new Date();
-                      const newDate = new Date(date);
-                      // Preserve existing time if a date is already set, otherwise use current time
-                      const hours = field.value ? field.value.getHours() : now.getHours();
-                      const minutes = field.value ? field.value.getMinutes() : now.getMinutes();
-                      newDate.setHours(hours, minutes);
-                      field.onChange(newDate);
-                    }}
-                    disabled={(date) =>
-                      date < new Date(new Date().setHours(0, 0, 0, 0))
-                    }
-                    initialFocus
-                  />
-                  {field.value && (
-                    <div className="p-3 border-t border-border">
-                        <p className="text-sm text-muted-foreground mb-2">Deadline Time</p>
-                        <Input
-                            type="time"
-                            value={format(field.value, "HH:mm")}
-                            onChange={(e) => {
-                                const [hours, minutes] = e.target.value.split(':').map(Number);
-                                const newDate = set(field.value!, { hours, minutes });
-                                field.onChange(newDate);
-                            }}
-                        />
-                    </div>
-                  )}
-                </PopoverContent>
-              </Popover>
+              <FormControl>
+                <DateTimePicker field={field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
