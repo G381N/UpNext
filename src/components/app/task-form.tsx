@@ -82,25 +82,28 @@ function DateTimePicker({ field }: { field: any }) {
     const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const timeValue = e.target.value;
         if (!timeValue || !date) return;
-
-        const [hours, minutes] = timeValue.split(':').map(Number);
-        
-        let newHours = hours;
-        const isPM = timeValue.toLowerCase().includes('pm');
-        
-        if (isPM && hours < 12) {
-            newHours += 12;
-        } else if (!isPM && hours === 12) { // Handle 12 AM
-            newHours = 0;
+    
+        const [time, modifier] = timeValue.split(' ');
+        let [hours, minutes] = time.split(':').map(Number);
+    
+        if (modifier && modifier.toLowerCase() === 'pm' && hours < 12) {
+            hours += 12;
         }
-
-        const newDateTime = set(date, { hours: newHours, minutes });
+        if (modifier && modifier.toLowerCase() === 'am' && hours === 12) {
+            hours = 0;
+        }
+    
+        const newDateTime = set(date, { hours, minutes });
         setDate(newDateTime);
     };
     
     const handleSave = () => {
         field.onChange(date);
         setIsOpen(false);
+    };
+
+    const formatTime = (date: Date) => {
+        return format(date, "h:mm a");
     };
 
     return (
@@ -252,82 +255,87 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
   return (
     <div className="flex h-full flex-col">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-6 py-6">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Finalize project report" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="deadline"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Deadline (Optional)</FormLabel>
-                <FormControl>
-                  <DateTimePicker field={field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="folderId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Folder</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-1 flex-col justify-between space-y-6 py-6">
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a folder" />
-                    </SelectTrigger>
+                    <Input placeholder="e.g., Finalize project report" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    {folders.map((folder) => (
-                      <SelectItem key={folder.id} value={folder.id}>
-                        {folder.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? 'Saving...' : task ? 'Save Changes' : 'Create Task'}
-          </Button>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="deadline"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Deadline (Optional)</FormLabel>
+                  <FormControl>
+                    <DateTimePicker field={field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="folderId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Folder</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a folder" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {folders.map((folder) => (
+                        <SelectItem key={folder.id} value={folder.id}>
+                          {folder.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-           {task && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="w-full">Delete Task</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                  <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                          This will permanently delete the task: <strong>{task.title}</strong>. This action cannot be undone.
-                      </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-                          {isDeleting ? 'Deleting...' : 'Yes, delete task'}
-                      </AlertDialogAction>
-                  </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+          <div className="flex flex-col gap-2">
+            <Button type="submit" disabled={isPending} className="w-full">
+              {isPending ? 'Saving...' : task ? 'Save Changes' : 'Create Task'}
+            </Button>
+
+            {task && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="w-full">Delete Task</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently delete the task: <strong>{task.title}</strong>. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                            {isDeleting ? 'Deleting...' : 'Yes, delete task'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </form>
       </Form>
     </div>
