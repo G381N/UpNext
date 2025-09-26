@@ -30,7 +30,7 @@ import { db } from '@/lib/firebase/config';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 
 const taskSchema = z.object({
@@ -94,6 +94,7 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
           });
           toast({ title: 'Success', description: 'Task created successfully.' });
         }
+        form.reset();
         onSuccess?.();
       } catch (error) {
         toast({
@@ -147,9 +148,9 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "PPP")
+                        format(field.value, "PPP, p")
                       ) : (
-                        <span>Pick a date</span>
+                        <span>Pick a date and time</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -159,12 +160,38 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={(date) => {
+                      if (!date) {
+                        field.onChange(undefined);
+                        return;
+                      }
+                      const now = new Date();
+                      const newDate = new Date(date);
+                      // Preserve existing time if a date is already set, otherwise use current time
+                      const hours = field.value ? field.value.getHours() : now.getHours();
+                      const minutes = field.value ? field.value.getMinutes() : now.getMinutes();
+                      newDate.setHours(hours, minutes);
+                      field.onChange(newDate);
+                    }}
                     disabled={(date) =>
                       date < new Date(new Date().setHours(0, 0, 0, 0))
                     }
                     initialFocus
                   />
+                  {field.value && (
+                    <div className="p-3 border-t border-border">
+                        <p className="text-sm text-muted-foreground mb-2">Deadline Time</p>
+                        <Input
+                            type="time"
+                            value={format(field.value, "HH:mm")}
+                            onChange={(e) => {
+                                const [hours, minutes] = e.target.value.split(':').map(Number);
+                                const newDate = set(field.value!, { hours, minutes });
+                                field.onChange(newDate);
+                            }}
+                        />
+                    </div>
+                  )}
                 </PopoverContent>
               </Popover>
               <FormMessage />
