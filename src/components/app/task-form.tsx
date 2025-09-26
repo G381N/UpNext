@@ -27,12 +27,11 @@ import {
 import { usePathname } from 'next/navigation';
 import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, set } from 'date-fns';
 import { Calendar } from '../ui/calendar';
-
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Task title is required.'),
@@ -51,34 +50,45 @@ interface TaskFormProps {
 
 function DateTimePicker({ field }: { field: any }) {
     const [isOpen, setIsOpen] = React.useState(false);
+    const [date, setDate] = React.useState<Date | undefined>(field.value);
 
-    const handleDateSelect = (date: Date | undefined) => {
-        if (!date) {
-            field.onChange(undefined);
+    React.useEffect(() => {
+        // Keep internal state in sync with form state
+        setDate(field.value);
+    }, [field.value]);
+
+    const handleDateSelect = (selectedDate: Date | undefined) => {
+        if (!selectedDate) {
+            setDate(undefined);
             return;
         }
         const now = new Date();
-        // If there's an existing value, keep its time. Otherwise, use current time.
-        const hours = field.value instanceof Date ? field.value.getHours() : now.getHours();
-        const minutes = field.value instanceof Date ? field.value.getMinutes() : now.getMinutes();
+        // If there's an existing date, keep its time. Otherwise, use current time.
+        const hours = date instanceof Date ? date.getHours() : now.getHours();
+        const minutes = date instanceof Date ? date.getMinutes() : now.getMinutes();
         
-        const newDateTime = set(date, { hours, minutes });
-        field.onChange(newDateTime);
+        const newDateTime = set(selectedDate, { hours, minutes });
+        setDate(newDateTime);
     };
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const timeValue = e.target.value;
-        if (!timeValue || !field.value) {
+        if (!timeValue || !date) {
             return;
         }
         const [hours, minutes] = timeValue.split(':').map(Number);
-        const newDateTime = set(field.value, { hours, minutes });
-        field.onChange(newDateTime);
+        const newDateTime = set(date, { hours, minutes });
+        setDate(newDateTime);
+    };
+
+    const handleSave = () => {
+        field.onChange(date);
+        setIsOpen(false);
     };
 
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
                 <Button
                     variant={"outline"}
                     className={cn(
@@ -93,32 +103,39 @@ function DateTimePicker({ field }: { field: any }) {
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-                 <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={handleDateSelect}
-                    disabled={(date) =>
-                        date < new Date(new Date().setHours(0, 0, 0, 0))
-                    }
-                    initialFocus
-                />
-                {field.value && (
-                    <div className="border-t p-3">
-                        <p className="mb-2 text-sm text-muted-foreground">Deadline Time</p>
-                        <Input
-                            type="time"
-                            value={format(field.value, "HH:mm")}
-                            onChange={handleTimeChange}
-                        />
-                    </div>
-                )}
-            </PopoverContent>
-        </Popover>
+            </DialogTrigger>
+            <DialogContent className="w-auto sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Select Deadline</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center gap-4">
+                    <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={handleDateSelect}
+                        disabled={(d) =>
+                            d < new Date(new Date().setHours(0, 0, 0, 0))
+                        }
+                        initialFocus
+                    />
+                    {date && (
+                        <div className="w-full px-4">
+                            <p className="mb-2 text-sm text-muted-foreground">Deadline Time</p>
+                            <Input
+                                type="time"
+                                value={format(date, "HH:mm")}
+                                onChange={handleTimeChange}
+                            />
+                        </div>
+                    )}
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleSave}>Save</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }
-
 
 export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
   const [isPending, startTransition] = useTransition();
