@@ -29,7 +29,7 @@ import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp } from '
 import { db } from '@/lib/firebase/config';
 import { CalendarIcon, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format, set } from 'date-fns';
+import { format, set, getHours, getMinutes } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
@@ -71,29 +71,24 @@ function DateTimePicker({ field }: { field: any }) {
             return;
         }
         const now = new Date();
-        const hours = date instanceof Date ? date.getHours() : now.getHours();
-        const minutes = date instanceof Date ? date.getMinutes() : now.getMinutes();
+        const hours = date instanceof Date ? getHours(date) : getHours(now);
+        const minutes = date instanceof Date ? getMinutes(date) : getMinutes(now);
         
         const newDateTime = set(selectedDate, { hours, minutes });
         setDate(newDateTime);
         setView('time');
     };
-
-    const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const timeValue = e.target.value;
-        if (!timeValue || !date) return;
     
-        const [time, modifier] = timeValue.split(' ');
-        let [hours, minutes] = time.split(':').map(Number);
-    
-        if (modifier && modifier.toLowerCase() === 'pm' && hours < 12) {
+    const handleTimeChange = ({ hour, minute, period }: { hour: number, minute: number, period: 'am' | 'pm' }) => {
+        if (!date) return;
+        let hours = hour;
+        if (period === 'pm' && hours < 12) {
             hours += 12;
         }
-        if (modifier && modifier.toLowerCase() === 'am' && hours === 12) {
+        if (period === 'am' && hours === 12) { // Midnight case
             hours = 0;
         }
-    
-        const newDateTime = set(date, { hours, minutes });
+        const newDateTime = set(date, { hours, minutes: minute });
         setDate(newDateTime);
     };
     
@@ -105,6 +100,12 @@ function DateTimePicker({ field }: { field: any }) {
     const formatTime = (date: Date) => {
         return format(date, "h:mm a");
     };
+
+    const currentHour = date ? getHours(date) : 0;
+    const currentMinute = date ? getMinutes(date) : 0;
+    const currentPeriod = currentHour >= 12 ? 'pm' : 'am';
+    let displayHour = currentHour % 12;
+    if (displayHour === 0) displayHour = 12; // Noon/midnight case
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -145,15 +146,50 @@ function DateTimePicker({ field }: { field: any }) {
 
                 {view === 'time' && date && (
                   <div className="flex flex-col items-center gap-4 p-4">
-                      <p className="text-center text-muted-foreground">
+                      <p className="text-center text-sm text-muted-foreground">
                         Selected date: {format(date, "PPP")}
                       </p>
-                      <Input
-                          type="time"
-                          defaultValue={format(date, "HH:mm")}
-                          onChange={handleTimeChange}
-                          className="w-full text-center text-lg"
-                      />
+                      <div className="flex items-center gap-2">
+                        <Select
+                            value={String(displayHour)}
+                            onValueChange={(value) => handleTimeChange({ hour: Number(value), minute: currentMinute, period: currentPeriod as 'am' | 'pm'})}
+                        >
+                            <SelectTrigger className="w-[80px]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: 12 }, (_, i) => i + 1).map(hour => (
+                                    <SelectItem key={hour} value={String(hour)}>{hour}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <span>:</span>
+                        <Select
+                            value={String(currentMinute).padStart(2, '0')}
+                             onValueChange={(value) => handleTimeChange({ hour: displayHour, minute: Number(value), period: currentPeriod as 'am' | 'pm'})}
+                        >
+                            <SelectTrigger className="w-[80px]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(minute => (
+                                    <SelectItem key={minute} value={minute}>{minute}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={currentPeriod}
+                            onValueChange={(value) => handleTimeChange({ hour: displayHour, minute: currentMinute, period: value as 'am' | 'pm'})}
+                        >
+                            <SelectTrigger className="w-[80px]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="am">AM</SelectItem>
+                                <SelectItem value="pm">PM</SelectItem>
+                            </SelectContent>
+                        </Select>
+                      </div>
                   </div>
                 )}
                 
