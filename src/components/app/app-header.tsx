@@ -285,7 +285,7 @@ export default function AppHeader() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm">
+            <Button size="sm" disabled={isPrioritizing}>
               New
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
