@@ -86,10 +86,11 @@ function DateTimePicker({ field }: { field: any }) {
         const [hours, minutes] = timeValue.split(':').map(Number);
         
         let newHours = hours;
-        if (timeValue.toLowerCase().includes('pm') && hours < 12) {
+        const isPM = timeValue.toLowerCase().includes('pm');
+        
+        if (isPM && hours < 12) {
             newHours += 12;
-        }
-        if (timeValue.toLowerCase().includes('am') && hours === 12) {
+        } else if (!isPM && hours === 12) { // Handle 12 AM
             newHours = 0;
         }
 
@@ -305,15 +306,8 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
           <Button type="submit" disabled={isPending} className="w-full">
             {isPending ? 'Saving...' : task ? 'Save Changes' : 'Create Task'}
           </Button>
-        </form>
-      </Form>
 
-      {task && (
-        <div className="mt-auto border-t pt-6">
-            <h3 className="text-lg font-medium text-destructive">Danger Zone</h3>
-            <p className="text-sm text-muted-foreground mt-1 mb-4">
-              Deleting a task is a permanent action and cannot be undone.
-            </p>
+           {task && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                   <Button variant="destructive" className="w-full">Delete Task</Button>
@@ -333,8 +327,9 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
                   </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-        </div>
-      )}
+          )}
+        </form>
+      </Form>
     </div>
   );
 }
