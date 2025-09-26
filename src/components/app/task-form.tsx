@@ -29,7 +29,7 @@ import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp } from '
 import { db } from '@/lib/firebase/config';
 import { CalendarIcon, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format, set, parse } from 'date-fns';
+import { format, set } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
@@ -56,17 +56,14 @@ function DateTimePicker({ field }: { field: any }) {
     const [view, setView] = React.useState<'date' | 'time'>('date');
 
     React.useEffect(() => {
-        // Keep internal state in sync with form state
         setDate(field.value);
     }, [field.value]);
     
-    // Reset to date view when dialog opens/closes
     React.useEffect(() => {
         if (!isOpen) {
-          setTimeout(() => setView('date'), 150); // Delay to allow animation
+          setTimeout(() => setView('date'), 150);
         }
     }, [isOpen]);
-
 
     const handleDateSelect = (selectedDate: Date | undefined) => {
         if (!selectedDate) {
@@ -74,25 +71,32 @@ function DateTimePicker({ field }: { field: any }) {
             return;
         }
         const now = new Date();
-        // If there's an existing date, keep its time. Otherwise, use current time.
         const hours = date instanceof Date ? date.getHours() : now.getHours();
         const minutes = date instanceof Date ? date.getMinutes() : now.getMinutes();
         
         const newDateTime = set(selectedDate, { hours, minutes });
         setDate(newDateTime);
-        setView('time'); // Switch to time view
+        setView('time');
     };
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const timeValue = e.target.value; // HH:mm
-        if (!timeValue || !date) {
-            return;
-        }
+        const timeValue = e.target.value;
+        if (!timeValue || !date) return;
+
         const [hours, minutes] = timeValue.split(':').map(Number);
-        const newDateTime = set(date, { hours, minutes });
+        
+        let newHours = hours;
+        if (timeValue.toLowerCase().includes('pm') && hours < 12) {
+            newHours += 12;
+        }
+        if (timeValue.toLowerCase().includes('am') && hours === 12) {
+            newHours = 0;
+        }
+
+        const newDateTime = set(date, { hours: newHours, minutes });
         setDate(newDateTime);
     };
-
+    
     const handleSave = () => {
         field.onChange(date);
         setIsOpen(false);
@@ -142,7 +146,7 @@ function DateTimePicker({ field }: { field: any }) {
                       </p>
                       <Input
                           type="time"
-                          value={format(date, "HH:mm")}
+                          defaultValue={format(date, "HH:mm")}
                           onChange={handleTimeChange}
                           className="w-full text-center text-lg"
                       />
@@ -245,9 +249,9 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
   }
 
   return (
-    <>
+    <div className="flex h-full flex-col">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-6 py-6">
           <FormField
             control={form.control}
             name="title"
@@ -303,8 +307,9 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
           </Button>
         </form>
       </Form>
+
       {task && (
-        <div className="mt-8 border-t pt-6">
+        <div className="mt-auto border-t pt-6">
             <h3 className="text-lg font-medium text-destructive">Danger Zone</h3>
             <p className="text-sm text-muted-foreground mt-1 mb-4">
               Deleting a task is a permanent action and cannot be undone.
@@ -330,6 +335,6 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
             </AlertDialog>
         </div>
       )}
-    </>
+    </div>
   );
 }
