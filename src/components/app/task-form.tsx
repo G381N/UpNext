@@ -25,11 +25,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { usePathname } from 'next/navigation';
-import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp, deleteDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { CalendarIcon, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format, set } from 'date-fns';
+import { format, set, parse } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
@@ -84,7 +84,7 @@ function DateTimePicker({ field }: { field: any }) {
     };
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const timeValue = e.target.value;
+        const timeValue = e.target.value; // HH:mm
         if (!timeValue || !date) {
             return;
         }
@@ -109,7 +109,7 @@ function DateTimePicker({ field }: { field: any }) {
                     )}
                 >
                     {field.value ? (
-                        format(field.value, "PPP, p")
+                        format(field.value, "PP, p")
                     ) : (
                         <span>Pick a date and time</span>
                     )}
@@ -149,12 +149,12 @@ function DateTimePicker({ field }: { field: any }) {
                   </div>
                 )}
                 
-                <DialogFooter>
-                    {view === 'time' && (
+                <DialogFooter className="justify-between">
+                    {view === 'time' ? (
                         <Button variant="ghost" onClick={() => setView('date')}>
                             <ChevronLeft className="mr-2 h-4 w-4" /> Back
                         </Button>
-                    )}
+                    ) : <div />}
                     <Button onClick={handleSave}>Save</Button>
                 </DialogFooter>
             </DialogContent>
@@ -226,13 +226,12 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
     if (!task || !userId) return;
 
     startDeleteTransition(async () => {
-      try {
-        await deleteTask(task.id, userId);
+      const result = await deleteTask(task.id, userId);
+      if (result.success) {
         toast({ title: 'Task deleted', description: `The task "${task.title}" has been removed.` });
         onSuccess?.();
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "An unknown error occurred.";
-        toast({ variant: 'destructive', title: 'Error deleting task', description: message });
+      } else {
+        toast({ variant: 'destructive', title: 'Error deleting task', description: result.error });
       }
     });
   };
