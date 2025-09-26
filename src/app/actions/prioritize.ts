@@ -16,6 +16,19 @@ export async function runTaskPrioritization(tasks: AiTask[]) {
     if (tasksMissingIds.length > 0) {
       throw new Error(`AI returned ${tasksMissingIds.length} tasks without an ID.`);
     }
+
+    // Verify that all original task IDs are present in the AI's response
+    const originalTaskIds = new Set(tasks.map(t => t.id));
+    const returnedTaskIds = new Set(prioritizedTasks.map(t => t.id));
+    if (originalTaskIds.size !== returnedTaskIds.size) {
+        throw new Error('AI returned a different number of tasks than it was given.');
+    }
+    for (const id of originalTaskIds) {
+        if (!returnedTaskIds.has(id)) {
+            throw new Error(`AI response is missing original task ID: ${id}`);
+        }
+    }
+    
     return prioritizedTasks;
   } catch (error) {
     console.error('Error prioritizing tasks:', error);
