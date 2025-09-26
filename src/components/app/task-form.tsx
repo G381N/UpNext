@@ -152,7 +152,7 @@ function DateTimePicker({ field }: { field: any }) {
                             <SelectTrigger className="w-[80px]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent position="popper">
+                            <SelectContent position="popper" className="max-h-56">
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(hour => (
                                     <SelectItem key={hour} value={String(hour)}>{String(hour).padStart(2, '0')}</SelectItem>
                                 ))}
@@ -166,7 +166,7 @@ function DateTimePicker({ field }: { field: any }) {
                             <SelectTrigger className="w-[80px]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent position="popper">
+                            <SelectContent position="popper" className="max-h-56">
                                 {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(minute => (
                                     <SelectItem key={minute} value={minute}>{minute}</SelectItem>
                                 ))}
