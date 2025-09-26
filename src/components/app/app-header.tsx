@@ -213,6 +213,7 @@ export default function AppHeader() {
   const { toast } = useToast();
   const [isPrioritizing, startTransition] = useTransition();
   const [isTaskSheetOpen, setIsTaskSheetOpen] = React.useState(false);
+  const pathname = usePathname();
   
   const [folders] = useCollection(
     user ? query(collection(db, 'users', user.uid, 'folders'), where('userId', '==', user.uid)) : null
@@ -220,15 +221,26 @@ export default function AppHeader() {
 
   const handlePrioritize = () => {
     if (!user) return;
+    const folderId = pathname.split('/folders/')[1];
+    if (!folderId) {
+      toast({ variant: 'destructive', title: 'No folder selected', description: 'Please select a folder to prioritize.' });
+      return;
+    }
+    
     startTransition(async () => {
-      const userTasksSnapshot = await getDocs(query(collection(db, 'users', user.uid, 'tasks'), where('completed', '==', false)));
+      const folderTasksQuery = query(
+        collection(db, 'users', user.uid, 'tasks'), 
+        where('folderId', '==', folderId),
+        where('completed', '==', false)
+      );
+      const tasksSnapshot = await getDocs(folderTasksQuery);
       
-      if (userTasksSnapshot.empty) {
-        toast({ title: 'No tasks to prioritize', description: 'Add some tasks to get started.' });
+      if (tasksSnapshot.empty) {
+        toast({ title: 'No tasks to prioritize', description: 'This folder has no active tasks.' });
         return;
       }
       
-      const userTasks = userTasksSnapshot.docs.map(doc => {
+      const folderTasks = tasksSnapshot.docs.map(doc => {
         const data = doc.data();
         const task = { 
             id: doc.id,
@@ -238,14 +250,14 @@ export default function AppHeader() {
         // Convert Timestamps to serializable format
         return {
             ...task,
-            createdAt: task.createdAt instanceof Timestamp ? task.createdAt.toDate().toISOString() : task.createdAt,
-            deadline: task.deadline instanceof Timestamp ? task.deadline.toDate().toISOString() : task.deadline,
+            createdAt: task.createdAt instanceof Timestamp ? task.createdAt.toDate().toISOString() : undefined,
+            deadline: task.deadline instanceof Timestamp ? task.deadline.toDate().toISOString() : undefined,
         };
       });
 
       try {
         toast({ title: 'Prioritizing Tasks...', description: 'Our AI is re-ordering your tasks for optimal productivity.' });
-        const prioritizedTasks = await runTaskPrioritization(userTasks as any);
+        const prioritizedTasks = await runTaskPrioritization(folderTasks as any);
         
         const batch = writeBatch(db);
         prioritizedTasks.forEach((task: any, index: number) => {
