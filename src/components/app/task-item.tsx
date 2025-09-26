@@ -4,19 +4,17 @@ import React from 'react';
 import { useTransition, useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Calendar } from 'lucide-react';
+import { Edit, Calendar } from 'lucide-react';
 import type { Task, Folder } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 import { TaskForm } from './task-form';
 import { useCollection } from 'react-firebase-hooks/firestore';
-import { collection, query, where, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { cn } from '@/lib/utils';
 import { format, isToday } from 'date-fns';
-import { deleteTask, undoTask } from '@/app/actions/tasks';
-import { ToastAction } from '../ui/toast';
 
 interface TaskItemProps {
   task: Task;
@@ -48,47 +46,6 @@ export default function TaskItem({ task }: TaskItemProps) {
       }
     });
   };
-
-  const handleDelete = () => {
-    if (!user) return;
-    startTransition(async () => {
-        try {
-            await deleteTask(task.id, user.uid);
-            toast({
-                title: "Task deleted",
-                description: "The task has been successfully deleted.",
-                action: (
-                    <ToastAction altText="Undo" onClick={() => handleUndo(task)}>
-                        Undo
-                    </ToastAction>
-                ),
-            });
-        } catch (e) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Failed to delete task.',
-            });
-        }
-    });
-};
-
-const handleUndo = async (taskToRestore: Task) => {
-    if (!user) return;
-    try {
-        await undoTask(taskToRestore, user.uid);
-        toast({
-            title: 'Task restored',
-            description: 'The task has been successfully restored.',
-        });
-    } catch (e) {
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Failed to restore task.',
-        });
-    }
-};
 
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Prevent card click from toggling checkbox
@@ -170,15 +127,6 @@ const handleUndo = async (taskToRestore: Task) => {
             />
           </SheetContent>
         </Sheet>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-destructive hover:text-destructive"
-          onClick={handleDelete}
-          disabled={isPending}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );

@@ -25,13 +25,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { usePathname } from 'next/navigation';
-import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { CalendarIcon, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, set } from 'date-fns';
 import { Calendar } from '../ui/calendar';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { deleteTask } from '@/app/actions/tasks';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Task title is required.'),
@@ -162,6 +164,7 @@ function DateTimePicker({ field }: { field: any }) {
 
 export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
   const [isPending, startTransition] = useTransition();
+  const [isDeleting, startDeleteTransition] = useTransition();
   const { toast } = useToast();
   const pathname = usePathname();
   const currentFolderId = pathname.split('/folders/')[1];
@@ -219,6 +222,21 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
     });
   };
   
+  const handleDelete = () => {
+    if (!task || !userId) return;
+
+    startDeleteTransition(async () => {
+      try {
+        await deleteTask(task.id, userId);
+        toast({ title: 'Task deleted', description: `The task "${task.title}" has been removed.` });
+        onSuccess?.();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "An unknown error occurred.";
+        toast({ variant: 'destructive', title: 'Error deleting task', description: message });
+      }
+    });
+  };
+  
   if (!folders.length) {
     return (
       <div className="py-6 text-center text-muted-foreground">
@@ -228,62 +246,91 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-6">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Finalize project report" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="deadline"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Deadline (Optional)</FormLabel>
-              <FormControl>
-                <DateTimePicker field={field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="folderId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Folder</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-6">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a folder" />
-                  </SelectTrigger>
+                  <Input placeholder="e.g., Finalize project report" {...field} />
                 </FormControl>
-                <SelectContent>
-                  {folders.map((folder) => (
-                    <SelectItem key={folder.id} value={folder.id}>
-                      {folder.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" disabled={isPending} className="w-full">
-          {isPending ? 'Saving...' : task ? 'Save Changes' : 'Create Task'}
-        </Button>
-      </form>
-    </Form>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="deadline"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Deadline (Optional)</FormLabel>
+                <FormControl>
+                  <DateTimePicker field={field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="folderId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Folder</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a folder" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {folders.map((folder) => (
+                      <SelectItem key={folder.id} value={folder.id}>
+                        {folder.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={isPending} className="w-full">
+            {isPending ? 'Saving...' : task ? 'Save Changes' : 'Create Task'}
+          </Button>
+        </form>
+      </Form>
+      {task && (
+        <div className="mt-8 border-t pt-6">
+            <h3 className="text-lg font-medium text-destructive">Danger Zone</h3>
+            <p className="text-sm text-muted-foreground mt-1 mb-4">
+              Deleting a task is a permanent action and cannot be undone.
+            </p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full">Delete Task</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                  <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                          This will permanently delete the task: <strong>{task.title}</strong>. This action cannot be undone.
+                      </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                          {isDeleting ? 'Deleting...' : 'Yes, delete task'}
+                      </AlertDialogAction>
+                  </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+        </div>
+      )}
+    </>
   );
 }
