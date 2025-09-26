@@ -17,7 +17,7 @@ import {
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 import { TaskForm } from './task-form';
 import { useCollection } from 'react-firebase-hooks/firestore';
-import { collection, query, where, writeBatch, doc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, query, where, writeBatch, doc, serverTimestamp, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import type { Folder, Task } from '@/types';
 import { importTasksFromImage } from '@/app/actions/ocr';
@@ -230,15 +230,22 @@ export default function AppHeader() {
       
       const userTasks = userTasksSnapshot.docs.map(doc => {
         const data = doc.data();
-        return { 
+        const task = { 
             id: doc.id,
             ...data,
         } as Task;
+
+        // Convert Timestamps to serializable format
+        return {
+            ...task,
+            createdAt: task.createdAt instanceof Timestamp ? task.createdAt.toDate().toISOString() : task.createdAt,
+            deadline: task.deadline instanceof Timestamp ? task.deadline.toDate().toISOString() : task.deadline,
+        };
       });
 
       try {
         toast({ title: 'Prioritizing Tasks...', description: 'Our AI is re-ordering your tasks for optimal productivity.' });
-        const prioritizedTasks = await runTaskPrioritization(userTasks);
+        const prioritizedTasks = await runTaskPrioritization(userTasks as any);
         
         const batch = writeBatch(db);
         prioritizedTasks.forEach((task: any, index: number) => {
@@ -292,7 +299,7 @@ export default function AppHeader() {
           <DropdownMenuContent align="end">
             <Sheet open={isTaskSheetOpen} onOpenChange={setIsTaskSheetOpen}>
               <SheetTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={isPrioritizing}>
                   <Plus className="mr-2 h-4 w-4" />
                   <span>New Task</span>
                 </DropdownMenuItem>
@@ -310,14 +317,14 @@ export default function AppHeader() {
             </Sheet>
             
             <ImportTasksSheet>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={isPrioritizing}>
                     <ImagePlus className="mr-2 h-4 w-4" />
                     <span>Import from Image</span>
                 </DropdownMenuItem>
             </ImportTasksSheet>
             
             <ImportFromVoiceSheet>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={isPrioritizing}>
                 <Mic className="mr-2 h-4 w-4" />
                 <span>Import from Voice</span>
               </DropdownMenuItem>

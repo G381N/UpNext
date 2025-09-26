@@ -3,7 +3,13 @@
 import { autoPrioritizeTasks, type Task as AiTask } from '@/ai/flows/auto-prioritize-tasks';
 import type { Task } from '@/types';
 
-export async function runTaskPrioritization(tasks: Task[]) {
+// The Task type passed from the client will have dates as ISO strings
+type ClientTask = Omit<Task, 'createdAt' | 'deadline'> & {
+  createdAt?: string;
+  deadline?: string;
+};
+
+export async function runTaskPrioritization(tasks: ClientTask[]) {
   if (!tasks || tasks.length === 0) {
     return [];
   }
@@ -11,7 +17,7 @@ export async function runTaskPrioritization(tasks: Task[]) {
     const aiTasks: AiTask[] = tasks.map(task => ({
         id: task.id,
         title: task.title,
-        deadline: task.deadline?.toDate().toISOString(),
+        deadline: task.deadline,
         priority: task.priority,
     }));
 
