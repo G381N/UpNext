@@ -15,6 +15,7 @@ export type Task = {
   id: string;
   title: string;
   deadline?: Timestamp;
+  priority?: 'High' | 'Medium' | 'Low';
   completed: boolean;
   folderId: string;
   userId: string;

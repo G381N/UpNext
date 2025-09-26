@@ -229,12 +229,11 @@ export default function AppHeader() {
       }
       
       const userTasks = userTasksSnapshot.docs.map(doc => {
-        const data = doc.data() as Omit<Task, 'id'>;
+        const data = doc.data();
         return { 
             id: doc.id,
-            title: data.title,
-            deadline: data.deadline?.toDate().toISOString() || undefined,
-        };
+            ...data,
+        } as Task;
       });
 
       try {

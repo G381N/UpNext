@@ -16,6 +16,7 @@ const TaskSchema = z.object({
   id: z.string(),
   title: z.string(),
   deadline: z.string().optional(),
+  priority: z.enum(['High', 'Medium', 'Low']).optional(),
   folderId: z.string().optional(),
   order: z.number().optional(),
 });
@@ -36,22 +37,22 @@ const prioritizeTasksPrompt = ai.definePrompt({
   name: 'prioritizeTasksPrompt',
   input: {schema: AutoPrioritizeTasksInputSchema},
   output: {schema: AutoPrioritizeTasksOutputSchema},
-  prompt: `You are an AI assistant that specializes in smart task prioritization. Your goal is to create a productive task order that helps users build momentum and get things done in the shortest time possible, while respecting deadlines.
+  prompt: `You are an AI assistant that specializes in smart task prioritization. Your goal is to create a productive task order that helps users build momentum and get things done in the shortest time possible, while respecting deadlines and priority.
 
-Analyze the following list of tasks. For each task, first estimate the time it would take to complete (e.g., 5 mins, 2 hours, 1 day).
+Analyze the following list of tasks. For each task, first estimate the time it would take to complete (e.g., 5 mins, 2 hours, 1 day) and its complexity.
 
 Your prioritization strategy is as follows:
 
 1.  **Quick Wins First (Momentum Builders)**: Identify any tasks that are very small and can be completed in under 15 minutes (e.g., "reply to an email," "make a quick call," "switch on lights"). These should be placed at the very top of the list to get them out of the way and build momentum.
-2.  **Urgent & Important Deadlines**: After the quick wins, identify tasks with the most urgent deadlines. Order them by which is due soonest. If a task's deadline is extremely close (e.g., within the next few hours), it might need to be prioritized even before some quick wins, but use your judgment based on its estimated completion time. A 2-hour task due in 3 hours is more critical than a 5-minute task with no deadline.
-3.  **Logical Flow & Importance (Remaining Tasks)**: For the remaining tasks, order them based on a logical workflow and perceived importance. If a task seems like a blocker for others, it should come first. The goal is to avoid "starvation" where smaller but important tasks are perpetually pushed down by larger ones. Create a balance that allows the user to tackle a mix of tasks to maintain productivity.
+2.  **Urgent & Important Deadlines**: After the quick wins, identify tasks with the most urgent deadlines. Order them by which is due soonest. If a task has a 'High' priority, it should be given more weight. A high-priority task with a deadline approaching should be placed before a medium-priority task with a similar deadline.
+3.  **Shortest Job First (SJF) for Remaining Tasks**: For all other tasks (those without deadlines or with distant deadlines), apply the "Shortest Job First" principle. Sort them based on their estimated completion time and complexity, from shortest/easiest to longest/hardest. If priorities are set, a 'High' priority task might be moved up, but the primary sorting for this group is by effort. The goal is to avoid "starvation" where important but non-urgent tasks are perpetually pushed down by larger ones.
 4.  **Final Review**: The final list should feel balanced and be the most efficient path to completion for the entire list.
 
 Current time for reference: ${new Date().toISOString()}
 
 Here is the list of tasks to prioritize:
 {{#each this}}
-- ID: {{id}}, Title: {{title}}, Deadline: {{#if deadline}}{{deadline}}{{else}}None{{/if}}
+- ID: {{id}}, Title: {{title}}, Deadline: {{#if deadline}}{{deadline}}{{else}}None{{/if}}, Priority: {{#if priority}}{{priority}}{{else}}Not set{{/if}}
 {{/each}}
 
 Return the full, reordered list of tasks. You MUST return all original fields for each task, especially the 'id'. Do not add, remove, or modify any tasks; only change their order. Your final output must be only the array of task objects.`,

@@ -1,13 +1,21 @@
 'use server';
 
 import { autoPrioritizeTasks, type Task as AiTask } from '@/ai/flows/auto-prioritize-tasks';
+import type { Task } from '@/types';
 
-export async function runTaskPrioritization(tasks: AiTask[]) {
+export async function runTaskPrioritization(tasks: Task[]) {
   if (!tasks || tasks.length === 0) {
     return [];
   }
   try {
-    const prioritizedTasks = await autoPrioritizeTasks(tasks);
+    const aiTasks: AiTask[] = tasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        deadline: task.deadline?.toDate().toISOString(),
+        priority: task.priority,
+    }));
+
+    const prioritizedTasks = await autoPrioritizeTasks(aiTasks);
     if (!prioritizedTasks) {
         throw new Error('AI prioritization returned no tasks.');
     }
