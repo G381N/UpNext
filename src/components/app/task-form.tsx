@@ -27,7 +27,7 @@ import {
 import { usePathname } from 'next/navigation';
 import { addDoc, collection, doc, serverTimestamp, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, set } from 'date-fns';
 import { Calendar } from '../ui/calendar';
@@ -51,11 +51,20 @@ interface TaskFormProps {
 function DateTimePicker({ field }: { field: any }) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(field.value);
+    const [view, setView] = React.useState<'date' | 'time'>('date');
 
     React.useEffect(() => {
         // Keep internal state in sync with form state
         setDate(field.value);
     }, [field.value]);
+    
+    // Reset to date view when dialog opens/closes
+    React.useEffect(() => {
+        if (!isOpen) {
+          setTimeout(() => setView('date'), 150); // Delay to allow animation
+        }
+    }, [isOpen]);
+
 
     const handleDateSelect = (selectedDate: Date | undefined) => {
         if (!selectedDate) {
@@ -69,6 +78,7 @@ function DateTimePicker({ field }: { field: any }) {
         
         const newDateTime = set(selectedDate, { hours, minutes });
         setDate(newDateTime);
+        setView('time'); // Switch to time view
     };
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,9 +116,12 @@ function DateTimePicker({ field }: { field: any }) {
             </DialogTrigger>
             <DialogContent className="w-auto sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Select Deadline</DialogTitle>
+                    <DialogTitle>
+                      {view === 'date' ? 'Select Deadline Date' : 'Select Deadline Time'}
+                    </DialogTitle>
                 </DialogHeader>
-                <div className="flex flex-col items-center gap-4">
+
+                {view === 'date' && (
                     <Calendar
                         mode="single"
                         selected={date}
@@ -118,18 +131,28 @@ function DateTimePicker({ field }: { field: any }) {
                         }
                         initialFocus
                     />
-                    {date && (
-                        <div className="w-full px-4">
-                            <p className="mb-2 text-sm text-muted-foreground">Deadline Time</p>
-                            <Input
-                                type="time"
-                                value={format(date, "HH:mm")}
-                                onChange={handleTimeChange}
-                            />
-                        </div>
-                    )}
-                </div>
+                )}
+
+                {view === 'time' && date && (
+                  <div className="flex flex-col items-center gap-4 p-4">
+                      <p className="text-center text-muted-foreground">
+                        Selected date: {format(date, "PPP")}
+                      </p>
+                      <Input
+                          type="time"
+                          value={format(date, "HH:mm")}
+                          onChange={handleTimeChange}
+                          className="w-full text-center text-lg"
+                      />
+                  </div>
+                )}
+                
                 <DialogFooter>
+                    {view === 'time' && (
+                        <Button variant="ghost" onClick={() => setView('date')}>
+                            <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                        </Button>
+                    )}
                     <Button onClick={handleSave}>Save</Button>
                 </DialogFooter>
             </DialogContent>
