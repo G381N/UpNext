@@ -15,6 +15,7 @@ import {
   SidebarGroupLabel,
   SidebarMenuAction,
   useSidebar,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import {
   FolderPlus,
@@ -34,6 +35,22 @@ import { TaskForm } from './task-form';
 import { getIcon } from '@/lib/icons';
 import { cn } from '@/lib/utils';
 
+
+function SidebarLogo() {
+    const { toggleSidebar, state } = useSidebar();
+    return (
+      <button
+        onClick={() => toggleSidebar()}
+        className={cn(
+          'flex w-full items-center gap-2 text-lg font-bold tracking-tight text-foreground',
+           state === 'collapsed' && 'justify-center'
+        )}
+      >
+        <Logo showText={state === 'expanded'} />
+      </button>
+    );
+}
+
 function FolderSettingsSheet({ folder, children }: { folder: Folder, children: React.ReactNode }) {
     const { user } = useAuth();
     const [isOpen, setIsOpen] = React.useState(false);
@@ -49,21 +66,6 @@ function FolderSettingsSheet({ folder, children }: { folder: Folder, children: R
             </SheetContent>
         </Sheet>
     )
-}
-
-function SidebarLogo() {
-    const { toggleSidebar, state } = useSidebar();
-    return (
-      <button
-        onClick={() => toggleSidebar()}
-        className={cn(
-          'flex w-full items-center gap-2 text-lg font-bold tracking-tight text-foreground',
-           state === 'collapsed' && 'justify-center'
-        )}
-      >
-        <Logo showText={state === 'expanded'} />
-      </button>
-    );
 }
 
 
@@ -94,44 +96,47 @@ export default function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Actions</SidebarGroupLabel>
           <SidebarMenu>
-             <SidebarMenuItem>
-              <Sheet open={isTaskSheetOpen} onOpenChange={setIsTaskSheetOpen}>
-                <SheetTrigger asChild>
-                  <SidebarMenuButton tooltip={{ children: 'New Task', side: 'right' }}>
-                    <PlusCircle />
-                    <span>New Task</span>
-                  </SidebarMenuButton>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Create a new task</SheetTitle>
-                  </SheetHeader>
-                  <TaskForm
-                    userId={user!.uid}
-                    onSuccess={() => setIsTaskSheetOpen(false)}
-                    folders={folders?.docs.map(doc => ({ id: doc.id, ...doc.data() } as Folder)) || []}
-                  />
-                </SheetContent>
-              </Sheet>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-               <Sheet open={isFolderSheetOpen} onOpenChange={setIsFolderSheetOpen}>
-                <SheetTrigger asChild>
-                  <SidebarMenuButton tooltip={{ children: 'New Folder', side: 'right' }}>
-                    <FolderPlus />
-                    <span>New Folder</span>
-                  </SidebarMenuButton>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Create a new folder</SheetTitle>
-                  </SheetHeader>
-                  <FolderForm userId={user!.uid} onSuccess={() => setIsFolderSheetOpen(false)} />
-                </SheetContent>
-              </Sheet>
-            </SidebarMenuItem>
+            <Sheet open={isTaskSheetOpen} onOpenChange={setIsTaskSheetOpen}>
+              <SheetTrigger asChild>
+                <SidebarMenuItem>
+                    <SidebarMenuButton tooltip={{ children: 'New Task', side: 'right' }}>
+                        <PlusCircle />
+                        <span>New Task</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Create a new task</SheetTitle>
+                </SheetHeader>
+                <TaskForm
+                  userId={user!.uid}
+                  onSuccess={() => setIsTaskSheetOpen(false)}
+                  folders={folders?.docs.map(doc => ({ id: doc.id, ...doc.data() } as Folder)) || []}
+                />
+              </SheetContent>
+            </Sheet>
+             <Sheet open={isFolderSheetOpen} onOpenChange={setIsFolderSheetOpen}>
+              <SheetTrigger asChild>
+                <SidebarMenuItem>
+                    <SidebarMenuButton tooltip={{ children: 'New Folder', side: 'right' }}>
+                        <FolderPlus />
+                        <span>New Folder</span>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Create a new folder</SheetTitle>
+                </SheetHeader>
+                <FolderForm userId={user!.uid} onSuccess={() => setIsFolderSheetOpen(false)} />
+              </SheetContent>
+            </Sheet>
           </SidebarMenu>
         </SidebarGroup>
+        
+        <SidebarSeparator className="my-1 group-data-[collapsible=icon]:my-2 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-2/3" />
+
         <SidebarGroup className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <SidebarGroupLabel>Folders</SidebarGroupLabel>
           <SidebarMenu>

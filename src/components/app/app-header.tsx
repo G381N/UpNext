@@ -223,6 +223,11 @@ export default function AppHeader() {
     startTransition(async () => {
       const userTasksSnapshot = await getDocs(query(collection(db, 'users', user.uid, 'tasks'), where('completed', '==', false)));
       
+      if (userTasksSnapshot.empty) {
+        toast({ title: 'No tasks to prioritize', description: 'Add some tasks to get started.' });
+        return;
+      }
+      
       const userTasks = userTasksSnapshot.docs.map(doc => {
         const data = doc.data() as Omit<Task, 'id'>;
         return { 
