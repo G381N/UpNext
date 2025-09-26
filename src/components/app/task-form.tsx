@@ -152,9 +152,9 @@ function DateTimePicker({ field }: { field: any }) {
                             <SelectTrigger className="w-[80px]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent position="popper">
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(hour => (
-                                    <SelectItem key={hour} value={String(hour)}>{hour}</SelectItem>
+                                    <SelectItem key={hour} value={String(hour)}>{String(hour).padStart(2, '0')}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -166,7 +166,7 @@ function DateTimePicker({ field }: { field: any }) {
                             <SelectTrigger className="w-[80px]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent position="popper">
                                 {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(minute => (
                                     <SelectItem key={minute} value={minute}>{minute}</SelectItem>
                                 ))}
@@ -179,7 +179,7 @@ function DateTimePicker({ field }: { field: any }) {
                             <SelectTrigger className="w-[80px]">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent position="popper">
                                 <SelectItem value="am">AM</SelectItem>
                                 <SelectItem value="pm">PM</SelectItem>
                             </SelectContent>
@@ -342,7 +342,7 @@ export function TaskForm({ userId, folders, task, onSuccess }: TaskFormProps) {
             />
           </div>
 
-          <div className="flex flex-col-reverse sm:flex-col gap-2">
+          <div className="flex flex-col gap-2">
             <Button type="submit" disabled={isPending} className="w-full">
               {isPending ? 'Saving...' : task ? 'Save Changes' : 'Create Task'}
             </Button>
