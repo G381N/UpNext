@@ -247,7 +247,7 @@ export default function AppHeader() {
             ...data,
         } as Task;
 
-        // Convert Timestamps to serializable format
+        // Convert Timestamps to serializable format (ISO strings)
         return {
             ...task,
             createdAt: task.createdAt instanceof Timestamp ? task.createdAt.toDate().toISOString() : undefined,
@@ -257,10 +257,10 @@ export default function AppHeader() {
 
       try {
         toast({ title: 'Prioritizing Tasks...', description: 'Our AI is re-ordering your tasks for optimal productivity.' });
-        const prioritizedTasks = await runTaskPrioritization(folderTasks as any);
+        const prioritizedTasks = await runTaskPrioritization(folderTasks);
         
         const batch = writeBatch(db);
-        prioritizedTasks.forEach((task: any, index: number) => {
+        prioritizedTasks.forEach((task, index: number) => {
             if(task.id) {
                 const taskRef = doc(db, 'users', user!.uid, 'tasks', task.id);
                 batch.update(taskRef, { order: index });
